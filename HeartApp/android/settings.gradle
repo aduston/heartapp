@@ -1,0 +1,3 @@
+rootProject.name = 'HeartApp'
+
+include ':app'
