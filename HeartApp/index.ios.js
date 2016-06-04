@@ -10,7 +10,7 @@ const ReactNative = require('react-native');
 
 const {
   AppRegistry,
-  NavigationExperimental,
+  Navigator,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,99 +18,55 @@ const {
   View,
 } = ReactNative;
 
-const {
-  CardStack: NavigationCardStack,
-  Header: NavigationHeader,
-} = NavigationExperimental;
-
-import type { NavigationSceneRendererProps } from 'NavigationTypeDefinition';
+var ListingPage = require('./ListingPage');
+var RecordScreen = require('./RecordScreen');
 
 class HeartApp extends React.Component {
-  _renderOverlay: Function;
-  _renderTitleComponent: Function;
-  
   constructor(props) {
     super(props);
-    this.state = {
-      stack: {
-        key: 'page0',
-        index: 0,
-        children: [
-          { key: 'what', species: 'fuckthis' }
-        ]
-      }
-    };
-  }
-
-  componentWillMount() {
-    this._renderOverlay = this._renderOverlay.bind(this);
-    this._renderTitleComponent = this._renderTitleComponent.bind(this);
-    this._renderScene = this._renderScene.bind(this);
   }
   
   render() {
     return (
-        <NavigationCardStack
-         navigationState={this.state.stack}
-         renderOverlay={this._renderOverlay}
-         renderScene={this._renderScene}
+        <Navigator
+          initialRoute={{message: 'yeah',}}
+          renderScene={this._renderScene.bind(this)}
+          configureScene={this._configureScene.bind(this)}
         />
     );
   }
 
-  _renderOverlay(props: NavigationSceneRendererProps): ReactElement<any>{
-    console.log("rendering overlay");
-    return (
-        <NavigationHeader
-          {...props}
-          renderTitleComponent={this._renderTitleComponent}
-          renderRightComponent={this._renderRightComponent}
-        />
-    );
+  _configureScene(route) {
+    return Navigator.SceneConfigs.FloatFromBottom;
   }
 
-  _renderTitleComponent(props: NavigationSceneRendererProps): ReactElement<any> {
-    return (
-        <NavigationHeader.Title style={styles.title}>
-        Hello
-        </NavigationHeader.Title>
-    );
+  _recordPressed(nav) {
+    nav.push({ id: 'record', })
   }
 
-  _renderRightComponent(props): ReactElement<any> {
-    return (
-        <TouchableHighlight>
-          <Text>New</Text>
-        </TouchableHighlight>
-    );
-  }
-
-  _renderScene(props) {
-    return (
-      <ScrollView/>
-    );
+  _renderScene(route, nav) {
+    switch (route.id) {
+    case 'record':
+      return (
+          <RecordScreen navigator={nav}/>
+      );
+    default:
+      return (
+          <View style={styles.container}>
+          <Text>Hello</Text>
+          <TouchableHighlight onPress={this._recordPressed.bind(this, nav)}>
+          <View><Text>Record</Text></View>
+          </TouchableHighlight>
+          </View>
+      );
+    }
   }
 }
 
 const styles = StyleSheet.create({
-  title: {
-    backgroundColor: 'yellow',
-  },
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    backgroundColor: 'yellow',
+    marginTop: 20,
   },
 });
 
