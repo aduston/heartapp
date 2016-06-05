@@ -11,9 +11,7 @@ const {
   View,
 } = ReactNative;
 
-const MONITOR_DISCOVERED = 0,
-      MONITOR_CONNECTING = 1,
-      MONITOR_CONNECTED = 2;
+var HeartRateDisplay = require('./HeartRateDisplay');
 
 class RecordScreen extends React.Component {
   constructor(props) {
@@ -21,7 +19,7 @@ class RecordScreen extends React.Component {
     this.state = {
       bluetoothOn: false,
       monitorName: null,
-      monitorState: null
+      peripheral: null
     };
   }
 
@@ -57,71 +55,15 @@ class RecordScreen extends React.Component {
       monitorName = peripheral.advertisement.manufacturerData.toString('hex');
     }
     this.setState({
-      monitorName: monitorName
+      monitorName: monitorName,
+      peripheral: peripheral
     });
   }
-
-  _connectHeartRate(peripheral) {
-    function parseHR (bytes) {
-      if (bytes.length == 0) {
-        return 0;
-      }
-      // see
-      // https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=239866
-      var flags = bytes[0];
-      var hrFormat = flags & 0x1;
-      var contactStatus = (flags & 0x2) >> 1;
-      var contactSupport = (flags & 0x4) >> 2;
-      var energyExpended = (flags & 0x8) >> 3;
-      var rrInterval = (flags & 0x10) >> 4;
-
-      var offset = 1;
-      var hrBytes = bytes.buffer.slice(offset, offset + 1 + hrFormat);
-      var hr = hrFormat == 1 ? new Uint16Array(hrBytes)[0] : new Uint8Array(hrBytes)[0];
-      offset += hrFormat + 1;
-
-      // TODO: energy expended and rr
-
-      return {
-        hr: hr
-      }
-    }
-
-    function print(data, notification) {
-      var parsedData = parseHR(data);
-      
-    }
-
-    var characteristic;
-
-    function notify(error, services, characteristics) {
-      console.log("discovered characteristics", services[0].uuid, characteristics[0].uuid);
-      self.characteristic = characteristics[0];
-      self.characteristic.notify(true);
-      self.characteristic.on("data", print);
-    };
-
-    function disconnected() {
-      console.log("disconnected");
-      self.characteristic.removeListener('data', print);
-      self._connectHeartRate(peripheral);
-      self.setState({
-        heartRate:0
-      });
-    };
-
-    function discover(error){
-      peripheral.once('disconnect', disconnected);
-      console.log("connect", error);
-      peripheral.discoverSomeServicesAndCharacteristics(["180d"], ["2a37"], notify);
-    }
-    peripheral.connect(discover);
-  }
-});
   
   render() {
     var bluetoothState = null;
     var connectedMonitor = null;
+    var rateDisplay = null;
     if (!this.state.bluetoothOn) {
       bluetoothState = (
           <View>
@@ -135,6 +77,9 @@ class RecordScreen extends React.Component {
             <Text>Connected to {this.state.monitorName}</Text>
             </View>
         );
+        rateDisplay = (
+            <HeartRateDisplay peripheral={this.state.peripheral}/>
+        );
       }
     }
     return (
@@ -146,6 +91,7 @@ class RecordScreen extends React.Component {
             </TouchableHighlight>
         {bluetoothState}
       {connectedMonitor}
+      {rateDisplay}
         </View>
     );
   }
