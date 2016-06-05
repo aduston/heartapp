@@ -1,23 +1,27 @@
 'use strict';
 
-var React = require('react');
-var ReactNative = require('react-native');
-
-const {
+import React, {
+  Component,
+  Dimensions,
   StyleSheet,
-  Text,
-  TouchableHighlight,
-  View
-} = ReactNative;
+  View,
+} from 'react-native';
 
-class HeartRateDisplay extends React.Component {
+import Chart from 'rnchart20';
+
+class HeartRateDisplay extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      count: 0,
-      hr: null
+      currentObservation: -1
     };
-    this._count = 0;
+    // don't keep this screen open for more than 24 hours
+    // and you'll be fine.
+    this._observations = new Uint8Array(24 * 60 * 60);
+    this._minuteIndexes = new Uint32Array(24 * 60);
+    this._currentMinute = -1;
+    this._startTime = null;
+
     this._peripheral = props.peripheral;
     this._characteristic = null;
     this._dataReceived = this._dataReceived.bind(this);
@@ -50,11 +54,29 @@ class HeartRateDisplay extends React.Component {
   }
 
   _dataReceived(data, notification) {
-    this._count++;
+    var currentObservation = this.state.currentObservation + 1;
+    if (currentObservation == 0) {
+      this._startTime = new Date().getTime();
+      this._currentMinute = 0;
+      this._minuteIndexes[0] = 0;
+    } else {
+      var elapsedTime = new Date().getTime() - this._startTime;
+      if (elapsedTime % 60000 < 1800) {
+        // we might be at a new minute.
+        var curMinute = elapsedTime / 60000;
+        if (curMinute > this._currentMinute) {
+          // we have not yet recorded the starting observation index
+          // for this minute.
+          this._currentMinute = curMinute;
+          this._minuteIndexes[curMinute] = currentObservation;
+        }
+      }
+    }
     var parsedData = this._parseHR(data);
+    this._observations[currentObservation] = parsedData.hr;
+
     this.setState({
-      count: this._count,
-      hr: parsedData.hr
+      currentObservation: currentObservation
     });
   }
 
@@ -78,17 +100,50 @@ class HeartRateDisplay extends React.Component {
     // TODO: energy expended and rr
     
     return {
-      hr: hr
+      hr: hr,
+      contactStatus: contactStatus,
+      contactSupport: contactSupport,
     }
   }
 
   render() {
-    return (
-        <View>
-        <Text>{this.state.count}</Text>
-        <Text>{this.state.hr}</Text>
-        </View>
-    );
+    if (this.state.currentObservation < 0) {
+      return (
+          <View>
+            <Text>Waiting for data...</Text>
+          </View>
+      );
+    } else {
+      var data = [];
+      var labels = [];
+      var startIndex = Math.max(0, this.state.currentObservation - 59);
+      for (var index = startIndex; index <= this.state.currentObservation; index++) {
+        data.push(this._observations[index]);
+        if (index == this._minuteIndexes[this._currentMinute]) {
+          labels.push(this._currentMinute + "");
+        } else if (this._currentMinute > 0 && index == this._minuteIndexes[this._currentMinute - 1]) {
+          labels.push((this._currentMinute - 1) + "");
+        } else {
+          labels.push(null);
+        }
+      }
+      const chartData = [{
+        name: "Heart Rate",
+        type: "bar",
+        color: "purple",
+        data: data
+      }];
+      return (
+          <View>
+          <Text>{this._observations[this.state.currentObservation]}</Text>
+          <Chart
+        chartData={chartData}
+        verticalGridStep={5}
+        xLabels={labels}
+        />
+          </View>
+      );
+    }
   }
 }
 
