@@ -30,11 +30,8 @@
    * `inet` value under `en0:`) and make sure your computer and iOS device are
    * on the same Wi-Fi network.
    */
-#if TARGET_IPHONE_SIMULATOR
+
   jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
-#else
-  jsCodeLocation = [NSURL URLWithString:@"http://65d4f07c.ngrok.io/index.ios.bundle?platform=ios&dev=true"];
-#endif
 
   /**
    * OPTION 2
@@ -50,6 +47,7 @@
                                                       moduleName:@"HeartApp"
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];

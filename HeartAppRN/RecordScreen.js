@@ -2,7 +2,9 @@
 
 var React = require('react');
 var ReactNative = require('react-native');
-var noble = require('react-native-ble');
+ 
+// var noble = require('react-native-ble');
+var noble = require('./mocknoble');
 
 const {
   StyleSheet,

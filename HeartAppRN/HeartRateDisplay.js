@@ -1,15 +1,16 @@
 'use strict';
 
-import React, {
-  Component,
-  Dimensions,
+var React = require('react');
+var ReactNative = require('react-native');
+
+const {
+  ListView,
   StyleSheet,
+  Text,
   View,
-} from 'react-native';
+} = ReactNative;
 
-import Chart from 'rnchart20';
-
-class HeartRateDisplay extends Component {
+class HeartRateDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -21,12 +22,12 @@ class HeartRateDisplay extends Component {
     this._minuteIndexes = new Uint32Array(24 * 60);
     this._currentMinute = -1;
     this._startTime = null;
-
+    
     this._peripheral = props.peripheral;
     this._characteristic = null;
     this._dataReceived = this._dataReceived.bind(this);
   }
-
+  
   componentDidMount() {
     this._peripheral.connect(this._connected.bind(this));
   }
@@ -136,11 +137,6 @@ class HeartRateDisplay extends Component {
       return (
           <View>
           <Text>{this._observations[this.state.currentObservation]}</Text>
-          <Chart
-        chartData={chartData}
-        verticalGridStep={5}
-        xLabels={labels}
-        />
           </View>
       );
     }
