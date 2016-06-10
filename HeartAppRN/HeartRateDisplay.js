@@ -3,7 +3,10 @@
 var React = require('react');
 var ReactNative = require('react-native');
 
+var ChartView = require('./ChartView');
+
 const {
+  Dimensions,
   ListView,
   StyleSheet,
   Text,
@@ -137,10 +140,20 @@ class HeartRateDisplay extends React.Component {
       return (
           <View>
           <Text>{this._observations[this.state.currentObservation]}</Text>
+          <ChartView data={data} style={styles.chartView} />
           </View>
       );
     }
   }
 }
+
+var styles = StyleSheet.create({
+  chartView: {
+    marginLeft: 5,
+    marginTop: 10,
+    width: Dimensions.get('window').width - 10,
+    height: 300
+  }
+});
 
 module.exports = HeartRateDisplay;
