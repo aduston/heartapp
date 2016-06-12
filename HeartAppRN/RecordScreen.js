@@ -92,8 +92,8 @@ class RecordScreen extends React.Component {
              <View><Text>Cancel</Text></View>
             </TouchableHighlight>
         {bluetoothState}
-      {connectedMonitor}
-      {rateDisplay}
+        {connectedMonitor}
+        {rateDisplay}
         </View>
     );
   }

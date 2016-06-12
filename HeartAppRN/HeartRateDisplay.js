@@ -84,6 +84,21 @@ class HeartRateDisplay extends React.Component {
     });
   }
 
+  _formatCurrentTime() {
+    var elapsedTime = new Date().getTime() - this._startTime;
+    var seconds = Math.floor(elapsedTime / 1000);
+    var hours = Math.floor(seconds / 3600);
+    var minutes = Math.floor(seconds / 60) % 60;
+    seconds = Math.floor(seconds % 60);
+    var secondsString = seconds < 10 ? (":0" + seconds) : (":" + seconds);
+    if (hours == 0) {
+      return minutes + secondsString;
+    } else {
+      var minutesString = minutes < 10 ? (":0" + minutes) : (":" + minutes);
+      return hours + minutesString + secondsString;
+    }
+  }
+
   _parseHR(bytes) {
     if (bytes.length == 0) {
       return 0;
@@ -127,8 +142,15 @@ class HeartRateDisplay extends React.Component {
       }
       return (
           <View>
-          <Text>{this._observations[this.state.currentObservation]}</Text>
-          <ChartView data={data} style={styles.chartView} />
+          <View style={styles.numDisplays}>
+          <View style={styles.numDisplay}>
+              <Text style={styles.hrDisplay}>{this._observations[this.state.currentObservation]}</Text>
+          </View>
+          <View style={styles.numDisplay}>
+          <Text style={styles.timeDisplay}>{this._formatCurrentTime()}</Text>
+          </View>
+            </View>
+            <ChartView data={data} style={styles.chartView} />
           </View>
       );
     }
@@ -141,6 +163,20 @@ var styles = StyleSheet.create({
     marginTop: 10,
     width: Dimensions.get('window').width - 10,
     height: 300
+  },
+  numDisplays: {
+    flexDirection: "row"
+  },
+  numDisplay: {
+    flex: 1
+  },
+  hrDisplay: {
+    fontSize: 60,
+    textAlign: 'center',
+  },
+  timeDisplay: {
+    fontSize: 60,
+    textAlign: 'right',
   }
 });
 
