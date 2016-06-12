@@ -44,7 +44,7 @@ class MockCharacteristic {
     this._intervalId = setInterval(
       this._sendNotification.bind(this),
       1000);
-    this._hr = 100;
+    this._hr = 10;
   }
   
   on(event, callback) {
@@ -62,13 +62,13 @@ class MockCharacteristic {
     }
     var flags = 0x1;
     this._hr += 3;
-    this._hr %= 180;
+    this._hr %= 80;
 
     var arr = [0x1, 0x0, this._hr];
     var buf = new ArrayBuffer(3);
     var view = new Uint8Array(buf);
     view[0] = 0x1;
-    view[1] = this._hr;
+    view[1] = this._hr + 50 + Math.random() * 40;
     view[2] = 0;
     arr.buffer = buf;
     this._notificationCallback(arr, null);
