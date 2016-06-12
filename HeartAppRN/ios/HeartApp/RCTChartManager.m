@@ -14,6 +14,6 @@ RCT_EXPORT_MODULE()
   return [[ChartView alloc] init];
 }
 
-RCT_EXPORT_VIEW_PROPERTY(data, NSNumberArray)
+RCT_EXPORT_VIEW_PROPERTY(data, NSArray<NSDictionary *>)
 
 @end

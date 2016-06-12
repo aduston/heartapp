@@ -1,12 +1,14 @@
 #import "ChartView.h"
 
-CGFloat BarHeight(CGFloat rectHeight, CGFloat minBarHeight, int minValue, int maxValue, int barValue) {
-  return (rectHeight - minBarHeight) * ((CGFloat)(barValue - minValue) / (CGFloat)(maxValue - minValue)) + minBarHeight;
-}
+#define TOP_MARGIN 10.0
+#define BOTTOM_MARGIN 0.0
+#define BAR_LEFT 30.0
+#define BAR_PADDING 1.0
+#define MIN_BAR_HEIGHT 12.0
 
 @implementation ChartView
 
-- (void)setData:(NSArray *)data {
+- (void)setData:(NSArray<NSDictionary *>*)data {
   _data = data;
   [self setNeedsDisplay];
 }
@@ -19,15 +21,12 @@ CGFloat BarHeight(CGFloat rectHeight, CGFloat minBarHeight, int minValue, int ma
   
   NSUInteger count = _data.count;
   
-  CGFloat padding = 1.0;
-  CGFloat barLeft = 30.0;
-  CGFloat minBarHeight = 12.0;
-  CGFloat barWidth = ((rect.size.width - barLeft) / count) - padding;
+  CGFloat barWidth = ((rect.size.width - BAR_LEFT - BAR_PADDING) / count) - BAR_PADDING;
   
   int minValue = 999;
   int maxValue = 0;
   for (i = 0; i < count; i++) {
-    int intValue = [[_data objectAtIndex:i] intValue];
+    int intValue = [[[_data objectAtIndex:i] objectForKey:@"hr"] intValue];
     if (intValue < minValue) {
       minValue = intValue;
     }
@@ -35,13 +34,19 @@ CGFloat BarHeight(CGFloat rectHeight, CGFloat minBarHeight, int minValue, int ma
       maxValue = intValue;
     }
   }
+  if ((maxValue % 10) != 0) {
+    maxValue += (10 - (maxValue % 10));
+  }
+  if ((minValue % 10) != 0) {
+    minValue -= (minValue % 10);
+  }
   
   // draw horizontal lines
   CGFloat dark = 0.1f;
   CGFloat light = 0.7f;
   CGFloat darkLine[4] = {dark, dark, dark, 1.0f};
   CGFloat lightLine[4] = {light, light, light, 1.0f};
-  CGFloat beatHeight = (rect.size.height - minBarHeight) / (CGFloat)(maxValue - minValue);
+  CGFloat beatHeight = (rect.size.height - TOP_MARGIN - BOTTOM_MARGIN - MIN_BAR_HEIGHT) / (CGFloat)(maxValue - minValue);
   CGContextRef c = UIGraphicsGetCurrentContext();
   NSDictionary *textAttributes = @{NSFontAttributeName:[UIFont fontWithName:@"Helvetica"  size:14]};
   BOOL stateSaved = FALSE;
@@ -55,9 +60,9 @@ CGFloat BarHeight(CGFloat rectHeight, CGFloat minBarHeight, int minValue, int ma
       // drawing text messes up the state.
       CGContextRestoreGState(c);
     }
-    CGFloat lineY = rect.size.height - (minBarHeight + (i - minValue) * beatHeight);
+    CGFloat lineY = rect.size.height - (BOTTOM_MARGIN + MIN_BAR_HEIGHT + (i - minValue) * beatHeight);
     CGContextSetStrokeColor(c, labeledLine ? darkLine : lightLine);
-    CGContextMoveToPoint(c, barLeft, lineY);
+    CGContextMoveToPoint(c, BAR_LEFT, lineY);
     CGContextAddLineToPoint(c, rect.size.width, lineY);
     CGContextStrokePath(c);
     CGContextSaveGState(c);
@@ -65,16 +70,20 @@ CGFloat BarHeight(CGFloat rectHeight, CGFloat minBarHeight, int minValue, int ma
     if (labeledLine) {
       NSString *label = [NSString stringWithFormat:@"%d", i];
       CGSize textSize = [label sizeWithAttributes:textAttributes];
-      [label drawAtPoint:CGPointMake(barLeft - 2.5 - textSize.width, lineY - (textSize.height / 2.0)) withAttributes:textAttributes];
+      [label drawAtPoint:CGPointMake(BAR_LEFT - 2.5 - textSize.width, lineY - (textSize.height / 2.0)) withAttributes:textAttributes];
     }
   }
   
   // draw bars
   [[UIColor blueColor] setFill];
+  NSDictionary *objectAtIndex;
   for (i = 0; i < count; i++) {
-    CGFloat barHeight = BarHeight(rect.size.height, minBarHeight, minValue, maxValue, [[_data objectAtIndex:i] intValue]);
-    UIRectFill(CGRectMake(barLeft + (barWidth + padding) * i,
-                          rect.size.height - barHeight,
+    objectAtIndex = [_data objectAtIndex:i];
+    int hr = [[objectAtIndex objectForKey:@"hr"] intValue];
+    CGFloat barHeight = beatHeight * (hr - minValue) + MIN_BAR_HEIGHT;
+    CGFloat barLeft = BAR_LEFT + BAR_PADDING + (barWidth + BAR_PADDING) * i;
+    UIRectFill(CGRectMake(barLeft,
+                          rect.size.height - (BOTTOM_MARGIN + MIN_BAR_HEIGHT + (hr - minValue) * beatHeight),
                           barWidth,
                           barHeight));
   }

@@ -10,7 +10,7 @@ class ChartView extends React.Component {
 }
 
 ChartView.propTypes = {
-  data: React.PropTypes.array,
+  data: React.PropTypes.array.isRequired
 };
 
 var RCTChart = requireNativeComponent('RCTChart', ChartView);

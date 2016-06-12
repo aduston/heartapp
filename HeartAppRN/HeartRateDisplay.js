@@ -67,7 +67,7 @@ class HeartRateDisplay extends React.Component {
       var elapsedTime = new Date().getTime() - this._startTime;
       if (elapsedTime % 60000 < 1800) {
         // we might be at a new minute.
-        var curMinute = elapsedTime / 60000;
+        var curMinute = Math.floor(elapsedTime / 60000);
         if (curMinute > this._currentMinute) {
           // we have not yet recorded the starting observation index
           // for this minute.
@@ -119,24 +119,12 @@ class HeartRateDisplay extends React.Component {
       );
     } else {
       var data = [];
-      var labels = [];
       var startIndex = Math.max(0, this.state.currentObservation - 59);
       for (var index = startIndex; index <= this.state.currentObservation; index++) {
-        data.push(this._observations[index]);
-        if (index == this._minuteIndexes[this._currentMinute]) {
-          labels.push(this._currentMinute + "");
-        } else if (this._currentMinute > 0 && index == this._minuteIndexes[this._currentMinute - 1]) {
-          labels.push((this._currentMinute - 1) + "");
-        } else {
-          labels.push(null);
-        }
+        data.push({
+          hr: this._observations[index],
+        });
       }
-      const chartData = [{
-        name: "Heart Rate",
-        type: "bar",
-        color: "purple",
-        data: data
-      }];
       return (
           <View>
           <Text>{this._observations[this.state.currentObservation]}</Text>

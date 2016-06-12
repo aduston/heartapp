@@ -2,5 +2,6 @@
 
 @interface ChartView : UIView
 
-@property (nonatomic, copy) NSArray* data;
+@property (nonatomic, copy) NSArray<NSDictionary *> *data;
+
 @end
