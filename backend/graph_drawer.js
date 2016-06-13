@@ -31,8 +31,8 @@ class ImageDrawer {
   }
 
   draw(output, done) {
-    this._drawValues();
     this._drawHorizontalLines();
+    this._drawValues();
     this._drawTimes();
     this._img.write(output, done);
   }
@@ -41,7 +41,7 @@ class ImageDrawer {
     if (this._barWidth > 1.0) {
       this._drawWideValues();
     } else {
-      var img = this._img.stroke('#00f', 0.5);
+      var img = this._img.stroke('#00f', 1);
       var totalWidth = this._width - this._leftMargin - this._rightMargin
       for (var i = 0; i < totalWidth; i++) {
         var minMax = this._minAndMaxAt(i, totalWidth);
@@ -72,7 +72,7 @@ class ImageDrawer {
   }
 
   _drawWideValues() {
-    var img = this._img.stroke('#00f', 0.5);
+    var img = this._img.stroke('#00f', 2);
     var lastX0, lastY0;
     for (var i = 0; i < this._observations.length; i++) {
       var x0 = this._leftMargin + this._barWidth * i;
@@ -88,6 +88,7 @@ class ImageDrawer {
   }
 
   _drawHorizontalLines() {
+    var img = this._img.font("Courier");
     for (var hr = this._minValue; hr <= this._maxValue; hr++) {
       if (this._maxValue - this._minValue > 40 && hr % 5 != 0) {
         continue;
@@ -95,11 +96,18 @@ class ImageDrawer {
       var labeledLine = (this._maxValue - this._minValue < 60 && hr % 5 == 0) || hr % 10 == 0;
       var y = this._height - (this._bottomMargin + this._minBarHeight + (hr - this._minValue) *
                               this._beatHeight);
-      this._img.stroke((labeledLine ? "#000" : "#333"), 0.5).drawLine(
+      img = img.stroke((labeledLine ? "#000" : "#ccc"), (labeledLine ? 0.5 : 0.3)).drawLine(
         this._leftMargin,
         y,
         this._width - this._rightMargin,
         y);
+      if (labeledLine) {
+        img = img.stroke("#000", 1).drawText(
+          this._width - this._leftMargin + 2,
+          y - (this._height / 2) + 2.0, // offset by 2.0 is total hack
+          hr + "",
+          "East");
+      }
     }
   }
 
