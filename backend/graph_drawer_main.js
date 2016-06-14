@@ -1,8 +1,8 @@
 'use strict'
 
-var drawer = require('./graph_drawer');
+var drawer = require('./canvas_graph_drawer');
 
-var numMinutes = 5;
+var numMinutes = 98;
 var hr = new Uint8Array(60 * numMinutes);
 
 hr[0] = 100;
