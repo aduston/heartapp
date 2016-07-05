@@ -11,5 +11,5 @@ import Foundation
 protocol HeartRateDelegate: class {
     func heartRateServiceDidConnect(name: String)
     func heartRateServiceDidDisconnect()
-    func heartRateDataArrived(data: HeartRateData)
+    func heartRateDataArrived(data: HeartRateDataPoint)
 }

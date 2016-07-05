@@ -6,11 +6,17 @@
 //  Copyright © 2016 Adam Duston. All rights reserved.
 //
 
-import Foundation
+class HeartRateData {
+    private var heartBeats: [UInt16]
+    private var curObservation: Int32
 
-struct HeartRateData {
-    var hr: UInt16
-    var sensorContact: UInt8
-    var energy: UInt16
-    var rrInterval: UInt16
+    init() {
+        self.heartBeats = [UInt16](repeating: 0, count: 60 * 60 * 24)
+        self.curObservation = -1
+    }
+
+    public func addObservation(heartRate: UInt16) {
+        heartBeats[curObservation + 1] = heartRate
+        curObservation += 1
+    }
 }

@@ -86,13 +86,13 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: NSError?) {
         guard error == nil else {
             // TODO: log, cleanup?
+            return
         }
         guard characteristic.uuid.isEqual(heartRateMeasurementUUID) else {
             return
         }
         let data = characteristic.value!;
-        var buffer = [UInt8](count: data.count)
-        data.copyBytes(to: buffer)
+        var buffer = [UInt8](repeating: 0x00, count: data.count)
         
     }
 }

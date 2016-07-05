@@ -11,9 +11,11 @@ import Foundation
 class DevHeartRateMonitor: HeartRateMonitor {
     private var delegate: HeartRateDelegate
     private var timer: Timer?
+    private var fireNo: UInt16;
     
     init(delegate: HeartRateDelegate) {
         self.delegate = delegate;
+        self.fireNo = 0;
     }
     
     func start() {
@@ -21,7 +23,17 @@ class DevHeartRateMonitor: HeartRateMonitor {
     }
     
     @objc func timerFired() {
-        
+        if fireNo == 0 {
+            self.delegate.heartRateServiceDidConnect(name: "polar strap")
+        } else {
+            self.delegate.heartRateDataArrived(data: HeartRateDataPoint(
+                hr: 80 + (fireNo * 3) % 80,
+                sensorContact: 0,
+                energy: 0,
+                rrInterval: 89
+            ))
+        }
+        fireNo += 1
     }
     
     func stop() {

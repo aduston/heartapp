@@ -14,10 +14,12 @@
 		57D799861D2ABE3F008F7C58 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D799841D2ABE3F008F7C58 /* LaunchScreen.storyboard */; };
 		57D7998E1D2ABFBD008F7C58 /* RecordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7998D1D2ABFBD008F7C58 /* RecordViewController.swift */; };
 		57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799911D2AD5F8008F7C58 /* HeartRateDelegate.swift */; };
-		57D799941D2AD6C5008F7C58 /* HeartRateData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799931D2AD6C5008F7C58 /* HeartRateData.swift */; };
+		57D799941D2AD6C5008F7C58 /* HeartRateDataPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799931D2AD6C5008F7C58 /* HeartRateDataPoint.swift */; };
 		57D799961D2AD70F008F7C58 /* HeartRateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799951D2AD70F008F7C58 /* HeartRateMonitor.swift */; };
 		57D799981D2AD768008F7C58 /* BLEHeartRateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799971D2AD768008F7C58 /* BLEHeartRateMonitor.swift */; };
 		57D7999A1D2ADE07008F7C58 /* DevHeartRateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D799991D2ADE07008F7C58 /* DevHeartRateMonitor.swift */; };
+		57D7999C1D2B3181008F7C58 /* HeartRateData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7999B1D2B3181008F7C58 /* HeartRateData.swift */; };
+		57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,10 +32,12 @@
 		57D799871D2ABE3F008F7C58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57D7998D1D2ABFBD008F7C58 /* RecordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordViewController.swift; sourceTree = "<group>"; };
 		57D799911D2AD5F8008F7C58 /* HeartRateDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateDelegate.swift; sourceTree = "<group>"; };
-		57D799931D2AD6C5008F7C58 /* HeartRateData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateData.swift; sourceTree = "<group>"; };
+		57D799931D2AD6C5008F7C58 /* HeartRateDataPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateDataPoint.swift; sourceTree = "<group>"; };
 		57D799951D2AD70F008F7C58 /* HeartRateMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateMonitor.swift; sourceTree = "<group>"; };
 		57D799971D2AD768008F7C58 /* BLEHeartRateMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BLEHeartRateMonitor.swift; sourceTree = "<group>"; };
 		57D799991D2ADE07008F7C58 /* DevHeartRateMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevHeartRateMonitor.swift; sourceTree = "<group>"; };
+		57D7999B1D2B3181008F7C58 /* HeartRateData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateData.swift; sourceTree = "<group>"; };
+		57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateChart.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,10 +78,12 @@
 				57D799841D2ABE3F008F7C58 /* LaunchScreen.storyboard */,
 				57D799871D2ABE3F008F7C58 /* Info.plist */,
 				57D799911D2AD5F8008F7C58 /* HeartRateDelegate.swift */,
-				57D799931D2AD6C5008F7C58 /* HeartRateData.swift */,
+				57D799931D2AD6C5008F7C58 /* HeartRateDataPoint.swift */,
 				57D799951D2AD70F008F7C58 /* HeartRateMonitor.swift */,
 				57D799971D2AD768008F7C58 /* BLEHeartRateMonitor.swift */,
 				57D799991D2ADE07008F7C58 /* DevHeartRateMonitor.swift */,
+				57D7999B1D2B3181008F7C58 /* HeartRateData.swift */,
+				57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -160,10 +166,12 @@
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,
 				57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */,
 				57D7999A1D2ADE07008F7C58 /* DevHeartRateMonitor.swift in Sources */,
-				57D799941D2AD6C5008F7C58 /* HeartRateData.swift in Sources */,
+				57D799941D2AD6C5008F7C58 /* HeartRateDataPoint.swift in Sources */,
 				57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */,
 				57D799961D2AD70F008F7C58 /* HeartRateMonitor.swift in Sources */,
+				57D7999C1D2B3181008F7C58 /* HeartRateData.swift in Sources */,
 				57D799981D2AD768008F7C58 /* BLEHeartRateMonitor.swift in Sources */,
+				57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
