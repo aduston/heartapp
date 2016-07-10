@@ -9,6 +9,16 @@
 import Foundation
 import CoreGraphics
 
+#if os(iOS)
+    import UIKit
+
+    typealias NSUIFont = UIFont
+#elseif os(OSX)
+    import Cocoa
+    
+    typealias NSUIFont = NSFont
+#endif
+
 struct ChartParams {
     let context: CGContext
     let rect: CGRect
@@ -19,12 +29,13 @@ struct ChartParams {
     let spaceLeft: CGFloat = 30
     let spaceBottom: CGFloat = 20
     let minBeatHeight: CGFloat = 5
+    let labelFont = NSUIFont(name: "Helvetica", size: 14)!
     
     var graphRect: CGRect {
-        return CGRect(origin: CGPoint(x: rect.origin.x + spaceLeft,
-                                      y: rect.origin.y),
-                      size: CGSize(width: rect.size.width - spaceLeft,
-                                   height: rect.size.height - spaceBottom))
+        return CGRect(origin: CGPoint(x: rect.minX + spaceLeft,
+                                      y: rect.minY + spaceBottom),
+                      size: CGSize(width: rect.width - spaceLeft,
+                                   height: rect.height - spaceBottom))
     }
     var beatHeight: CGFloat {
         if maxRate == minRate {
@@ -70,13 +81,28 @@ public class ChartDrawer {
                 continue
             }
             let labeledLine = (params.spread < 60 && hr % 5 == 0) || hr % 10 == 0
-            let y = params.graphRect.height - (params.minBeatHeight + CGFloat(hr - params.minRate) * params.beatHeight)
+            let y = params.graphRect.minY + params.minBeatHeight + CGFloat(hr - params.minRate) * params.beatHeight
             let strokeDarkness: CGFloat = labeledLine ? 0.0 : 0.6
             c.setStrokeColor(red: strokeDarkness, green: strokeDarkness, blue: strokeDarkness, alpha: 1.0)
             c.moveTo(x: params.graphRect.minX, y: y)
             c.addLineTo(x: params.graphRect.maxX, y: y)
             c.strokePath()
+            if labeledLine {
+                addHRLabel(params: params, hr: hr, y: y)
+            }
         }
+    }
+    
+    private func addHRLabel(params: ChartParams, hr: UInt8, y: CGFloat) {
+        let label = String(hr) as NSString
+        #if os(iOS)
+        let labelSize = label.size(attributes: [NSFontAttributeName: params.labelFont])
+        #elseif os(OSX)
+        let labelSize = label.size(withAttributes: [NSFontAttributeName: params.labelFont])
+        #endif
+        let point = CGPoint(x: params.graphRect.minX - 2 - labelSize.width,
+                            y: y - (labelSize.height / 2.0))
+        label.draw(at: point, withAttributes: [NSFontAttributeName: params.labelFont])
     }
     
     private func drawValues(_ params: ChartParams) {
