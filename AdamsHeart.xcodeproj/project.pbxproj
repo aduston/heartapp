@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		574010161D314471001B0E3F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574010151D314471001B0E3F /* main.swift */; };
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
 		57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */; };
 		57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		574010151D314471001B0E3F /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
 		57D799781D2ABE3F008F7C58 /* AdamsHeart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdamsHeart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				57D7999B1D2B3181008F7C58 /* HeartRateData.swift */,
 				57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */,
 				574524E71D313D8E00947F94 /* ChartDrawer.swift */,
+				574010151D314471001B0E3F /* main.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -166,6 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				57D7998E1D2ABFBD008F7C58 /* RecordViewController.swift in Sources */,
+				574010161D314471001B0E3F /* main.swift in Sources */,
 				574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */,
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,
 				57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */,

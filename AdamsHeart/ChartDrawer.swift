@@ -16,7 +16,11 @@ public class ChartDrawer {
         self.data = data
     }
     
-    public func draw(rect: CGRect, startObs: Double, numObs: Double) {
-        
+    public func draw(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) {
+        context.setStrokeColor(red: 0.5, green: 0.3, blue: 0.2, alpha: 0.5)
+        context.setLineWidth(10.0)
+        context.moveTo(x: 0, y: 0)
+        context.addLineTo(x: 200, y: 200)
+        context.strokePath()
     }
 }
