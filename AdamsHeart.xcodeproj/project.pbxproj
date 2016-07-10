@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		574010161D314471001B0E3F /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574010151D314471001B0E3F /* main.swift */; };
+		5740102D1D32C22F001B0E3F /* HeartRateDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */; };
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
 		57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */; };
 		57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */; };
@@ -24,8 +24,20 @@
 		57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		574010251D32C173001B0E3F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 57D799701D2ABE3E008F7C58 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 57D799771D2ABE3F008F7C58;
+			remoteInfo = AdamsHeart;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		574010151D314471001B0E3F /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		574010201D32C173001B0E3F /* AdamsHeartTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AdamsHeartTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		574010241D32C173001B0E3F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateDataTests.swift; sourceTree = "<group>"; };
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
 		57D799781D2ABE3F008F7C58 /* AdamsHeart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdamsHeart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -45,6 +57,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5740101D1D32C173001B0E3F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		57D799751D2ABE3F008F7C58 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -55,10 +74,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		574010211D32C173001B0E3F /* AdamsHeartTests */ = {
+			isa = PBXGroup;
+			children = (
+				5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */,
+				574010241D32C173001B0E3F /* Info.plist */,
+			);
+			path = AdamsHeartTests;
+			sourceTree = "<group>";
+		};
 		57D7996F1D2ABE3E008F7C58 = {
 			isa = PBXGroup;
 			children = (
 				57D7997A1D2ABE3F008F7C58 /* AdamsHeart */,
+				574010211D32C173001B0E3F /* AdamsHeartTests */,
 				57D799791D2ABE3F008F7C58 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				57D799781D2ABE3F008F7C58 /* AdamsHeart.app */,
+				574010201D32C173001B0E3F /* AdamsHeartTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,7 +119,6 @@
 				57D7999B1D2B3181008F7C58 /* HeartRateData.swift */,
 				57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */,
 				574524E71D313D8E00947F94 /* ChartDrawer.swift */,
-				574010151D314471001B0E3F /* main.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -97,6 +126,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5740101F1D32C173001B0E3F /* AdamsHeartTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 574010271D32C173001B0E3F /* Build configuration list for PBXNativeTarget "AdamsHeartTests" */;
+			buildPhases = (
+				5740101C1D32C173001B0E3F /* Sources */,
+				5740101D1D32C173001B0E3F /* Frameworks */,
+				5740101E1D32C173001B0E3F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				574010261D32C173001B0E3F /* PBXTargetDependency */,
+			);
+			name = AdamsHeartTests;
+			productName = AdamsHeartTests;
+			productReference = 574010201D32C173001B0E3F /* AdamsHeartTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		57D799771D2ABE3F008F7C58 /* AdamsHeart */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 57D7998A1D2ABE3F008F7C58 /* Build configuration list for PBXNativeTarget "AdamsHeart" */;
@@ -124,6 +171,14 @@
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Adam Duston";
 				TargetAttributes = {
+					5740101F1D32C173001B0E3F = {
+						CreatedOnToolsVersion = 8.0;
+						DevelopmentTeam = FH49SN26AD;
+						DevelopmentTeamName = "Adam Duston";
+						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 57D799771D2ABE3F008F7C58;
+					};
 					57D799771D2ABE3F008F7C58 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = FH49SN26AD;
@@ -146,11 +201,19 @@
 			projectRoot = "";
 			targets = (
 				57D799771D2ABE3F008F7C58 /* AdamsHeart */,
+				5740101F1D32C173001B0E3F /* AdamsHeartTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5740101E1D32C173001B0E3F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		57D799761D2ABE3F008F7C58 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -164,12 +227,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5740101C1D32C173001B0E3F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5740102D1D32C22F001B0E3F /* HeartRateDataTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		57D799741D2ABE3F008F7C58 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				57D7998E1D2ABFBD008F7C58 /* RecordViewController.swift in Sources */,
-				574010161D314471001B0E3F /* main.swift in Sources */,
 				574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */,
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,
 				57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */,
@@ -184,6 +254,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		574010261D32C173001B0E3F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 57D799771D2ABE3F008F7C58 /* AdamsHeart */;
+			targetProxy = 574010251D32C173001B0E3F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		57D7997F1D2ABE3F008F7C58 /* Main.storyboard */ = {
@@ -205,6 +283,35 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		574010281D32C173001B0E3F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				INFOPLIST_FILE = AdamsHeartTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.adamduston.AdamsHeartTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AdamsHeart.app/AdamsHeart";
+			};
+			name = Debug;
+		};
+		574010291D32C173001B0E3F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				INFOPLIST_FILE = AdamsHeartTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.adamduston.AdamsHeartTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AdamsHeart.app/AdamsHeart";
+			};
+			name = Release;
+		};
 		57D799881D2ABE3F008F7C58 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -319,6 +426,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		574010271D32C173001B0E3F /* Build configuration list for PBXNativeTarget "AdamsHeartTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				574010281D32C173001B0E3F /* Debug */,
+				574010291D32C173001B0E3F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		57D799731D2ABE3E008F7C58 /* Build configuration list for PBXProject "AdamsHeart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

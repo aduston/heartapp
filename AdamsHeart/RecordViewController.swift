@@ -40,7 +40,7 @@ class RecordViewController: UIViewController, HeartRateDelegate {
     
     func heartRateDataArrived(data: HeartRateDataPoint) {
         hrLabel?.text = String(data.hr)
-        heartRateData?.addObservation(heartRate: data.hr)
+        heartRateData?.addObservation(heartRate: UInt8(data.hr))
         
     }
 }

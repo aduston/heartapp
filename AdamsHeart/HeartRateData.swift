@@ -25,6 +25,10 @@ public class HeartRateData {
             startTime = NSDate.timeIntervalSinceReferenceDate()
         }
         let elapsedSeconds = Int(NSDate.timeIntervalSinceReferenceDate() - startTime)
+        addObservation(heartRate: heartRate, elapsedSeconds: elapsedSeconds)
+    }
+    
+    public func addObservation(heartRate: UInt8, elapsedSeconds: Int) {
         let minutes = UInt16(elapsedSeconds / 60)
         let seconds = UInt8(elapsedSeconds % 60)
         observations[Int(curObservation + 1)] = makeObservation(
@@ -47,7 +51,7 @@ public class HeartRateData {
     }
 
     private func makeObservation(minutes: UInt16, seconds: UInt8, halved: Bool, heartRate: UInt8) -> Observation {
-        var obs = (UInt32(minutes) << 16) & (UInt32(seconds) << 8) & UInt32(heartRate)
+        var obs = (UInt32(minutes) << 16) | (UInt32(seconds) << 8) | UInt32(heartRate)
         if halved {
             obs |= (0x1 << 15)
         }
@@ -60,5 +64,21 @@ public class HeartRateData {
         let halved = ((observation >> 8) & 0x80) != 0
         let heartRate = UInt8(observation & 0xFF)
         return (minutes, seconds, halved, heartRate)
+    }
+    
+    public func minAndMax(startObs: Int, numObs: Int) -> (minHR: UInt8, maxHR: UInt8) {
+        let startIndex = max(startObs, 0)
+        let endIndex = min(startObs + numObs, curObservation + 1)
+        var minHR: UInt8 = 200, maxHR: UInt8 = 0
+        for index in startIndex..<endIndex {
+            let heartRate = UInt8(observations[index] & 0xFF)
+            if heartRate < minHR {
+                minHR = heartRate
+            }
+            if heartRate > maxHR {
+                maxHR = heartRate
+            }
+        }
+        return (minHR, maxHR)
     }
 }
