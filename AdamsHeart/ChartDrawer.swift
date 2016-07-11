@@ -11,11 +11,9 @@ import CoreGraphics
 
 #if os(iOS)
     import UIKit
-
     typealias NSUIFont = UIFont
 #elseif os(OSX)
     import Cocoa
-    
     typealias NSUIFont = NSFont
 #endif
 
