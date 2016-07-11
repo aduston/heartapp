@@ -45,7 +45,7 @@ public class HeartRateData {
             if lastObs.halved {
                 return heartRate < 90
             } else {
-                return heartRate <= lastObs.heartRate * 3 / 5
+                return heartRate <= lastObs.heartRate / 5 * 3
             }
         }
     }

@@ -33,6 +33,15 @@ class HeartRateDataTests: XCTestCase {
         XCTAssertEqual(75, heartRate)
     }
     
+    func testAdd() {
+        let data = HeartRateData()
+        for i in 0...500 {
+            let val = 80 + (i % 90)
+            data.addObservation(heartRate: UInt8(val), elapsedSeconds: i)
+        }
+        XCTAssertEqual(500, data.curObservation)
+    }
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {

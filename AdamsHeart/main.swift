@@ -15,6 +15,15 @@ func dataSetOne() -> HeartRateData {
     return hrData
 }
 
+func dataSetTwo() -> HeartRateData {
+    let hrData = HeartRateData()
+    for i in 0...500 {
+        let val = 80 + (i % 90)
+        hrData.addObservation(heartRate: UInt8(val), elapsedSeconds: i)
+    }
+    return hrData
+}
+
 #if os(OSX)
 import Cocoa
 import CoreGraphics
@@ -26,8 +35,8 @@ func callChartDrawer() {
     toSave.lockFocus()
     let context = NSGraphicsContext.current()?.cgContext
     
-    let c = ChartDrawer(data: dataSetOne())
-    c.draw(context: context!, rect: CGRect(origin: CGPoint(x: 0, y: 0), size: size), startObs: 0.5, numObs: 3.5)
+    let c = ChartDrawer(data: dataSetTwo())
+    c.draw(context: context!, rect: CGRect(origin: CGPoint(x: 0, y: 0), size: size), startObs: 40.0, numObs: 460.0)
     
     let rep = NSBitmapImageRep(focusedViewRect: NSRect(origin: CGPoint(x: 0, y: 0), size: size))
     toSave.unlockFocus()
