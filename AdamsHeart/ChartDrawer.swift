@@ -129,8 +129,11 @@ public class ChartDrawer {
             c.setLineWidth(1.0)
             c.setStrokeColor(params.regularBeatColor)
             var inHasHalved = false
+            let obsPerPoint = params.numObs / Double(params.graphRect.width)
             for pointNo in 0..<Int(params.graphRect.width) {
-                let (minHR, maxHR, hasHalved) = data.summary(atPoint:pointNo, outOf:Int(params.graphRect.width))
+                let (minHR, maxHR, hasHalved) = data.summary(
+                    startObs: params.startObs + Double(pointNo) * obsPerPoint,
+                    endObs: params.startObs + Double(pointNo + 1) * obsPerPoint)
                 let maxY = params.yForHR(maxHR)
                 let minY = params.yForHR(minHR)
                 let x = params.graphRect.minX + CGFloat(pointNo) + 0.5
