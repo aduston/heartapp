@@ -81,4 +81,25 @@ public class HeartRateData {
         }
         return (minHR, maxHR)
     }
+    
+    public func summary(atPoint: Int, outOf: Int) -> (minHR: UInt8, maxHR: UInt8, hasHalved: Bool) {
+        let minIndex = Int((Double(atPoint) / Double(outOf)) * Double(curObservation))
+        let maxIndex = Int(ceil((Double(atPoint + 1) / Double(outOf)) * Double(curObservation)))
+        var minHR: UInt8 = 200
+        var maxHR: UInt8 = 0
+        var hasHalved = false
+        for i in minIndex..<maxIndex {
+            let (_, _, halved, hr) = HeartRateData.components(observation: observations[i])
+            if halved {
+                hasHalved = true
+            }
+            if hr < minHR {
+                minHR = hr
+            }
+            if hr > maxHR {
+                maxHR = hr
+            }
+        }
+        return (minHR, maxHR, hasHalved)
+    }
 }
