@@ -20,43 +20,44 @@ import CoreGraphics
 #endif
 
 struct ChartParams {
-    let context: CGContext
-    let rect: CGRect
-    let startObs: Double
-    let numObs: Double
-    let minRate: UInt8
-    let maxRate: UInt8
+    var context: CGContext
+    var rect: CGRect
+    var startObs: Double
+    var numObs: Double
+    var minRate: UInt8
+    var maxRate: UInt8
     let spaceLeft: CGFloat = 30
     let spaceBottom: CGFloat = 20
     let labelFont = NSUIFont(name: "Helvetica", size: 14)!
     let regularBeatColor = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 1.0])!
     let halvedBeatColor = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 1.0])!
     
-    var graphRect: CGRect {
-        // TODO: save after first calculation?
-        return CGRect(origin: CGPoint(x: rect.minX + spaceLeft,
-                                      y: rect.minY + spaceBottom),
-                      size: CGSize(width: rect.width - spaceLeft,
-                                   height: rect.height - spaceBottom))
-    }
-    var beatHeight: CGFloat {
-        // TODO:  save after first calculation?
+    var graphRect: CGRect
+    var beatHeight: CGFloat
+    var spread: UInt8
+    var barWidth: CGFloat
+    
+    init(context: CGContext, rect: CGRect, startObs: Double, numObs: Double, minRate: UInt8, maxRate: UInt8) {
+        self.context = context
+        self.rect = rect
+        self.startObs = startObs
+        self.numObs = numObs
+        self.minRate = minRate
+        self.maxRate = maxRate
+        self.graphRect =
+            CGRect(origin: CGPoint(x: rect.minX + spaceLeft,
+                                   y: rect.minY + spaceBottom),
+                   size: CGSize(width: rect.width - spaceLeft,
+                                height: rect.height - spaceBottom))
         if maxRate == minRate {
-            return 0
+            beatHeight = 0
         } else {
-            return graphRect.size.height / CGFloat(maxRate - minRate)
+            beatHeight = graphRect.size.height / CGFloat(maxRate - minRate)
         }
+        spread = maxRate - minRate
+        barWidth = graphRect.width / CGFloat(numObs)
     }
     
-    var spread: UInt8 {
-        return maxRate - minRate
-    }
-    
-    var barWidth: CGFloat {
-        // TODO: save after first
-        return graphRect.width / CGFloat(numObs)
-    }
-
     func yForHR(_ hr: UInt8) -> CGFloat {
         // TODO: save after first
         return graphRect.minY + CGFloat(hr - minRate) * beatHeight
@@ -178,6 +179,6 @@ public class ChartDrawer {
     }
     
     private func drawTimes(_ params: ChartParams) {
-        
+        // TODO: write me
     }
 }
