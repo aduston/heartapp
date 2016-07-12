@@ -9,11 +9,13 @@
 import Foundation
 
 public typealias Observation = UInt32
+public typealias AddObservationHandler = () -> ()
 
 public class HeartRateData {
     public var observations: [Observation]
     public var curObservation: Int
     private var startTime: TimeInterval = 0
+    private var addObservationHandler: AddObservationHandler?
 
     init() {
         self.observations = [Observation](repeating: 0, count: 60 * 60 * 24)
@@ -35,6 +37,13 @@ public class HeartRateData {
             minutes: minutes, seconds: seconds,
             halved: isHalved(heartRate: heartRate), heartRate: heartRate)
         curObservation += 1
+        if addObservationHandler != nil {
+            addObservationHandler!();
+        }
+    }
+    
+    public func setAddObservationHandler(handler: AddObservationHandler?) {
+        self.addObservationHandler = handler
     }
     
     private func isHalved(heartRate: UInt8) -> Bool {
