@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5740102D1D32C22F001B0E3F /* HeartRateDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */; };
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
+		574E44811D3581FB000D69BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44801D3581FB000D69BC /* Session.swift */; };
 		57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */; };
 		57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */; };
 		57D799811D2ABE3F008F7C58 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D7997F1D2ABE3F008F7C58 /* Main.storyboard */; };
@@ -39,6 +40,7 @@
 		574010241D32C173001B0E3F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateDataTests.swift; sourceTree = "<group>"; };
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
+		574E44801D3581FB000D69BC /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		57D799781D2ABE3F008F7C58 /* AdamsHeart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdamsHeart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				57D7999B1D2B3181008F7C58 /* HeartRateData.swift */,
 				57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */,
 				574524E71D313D8E00947F94 /* ChartDrawer.swift */,
+				574E44801D3581FB000D69BC /* Session.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				57D799941D2AD6C5008F7C58 /* HeartRateDataPoint.swift in Sources */,
 				57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */,
 				57D799961D2AD70F008F7C58 /* HeartRateMonitor.swift in Sources */,
+				574E44811D3581FB000D69BC /* Session.swift in Sources */,
 				57D7999C1D2B3181008F7C58 /* HeartRateData.swift in Sources */,
 				57D799981D2AD768008F7C58 /* BLEHeartRateMonitor.swift in Sources */,
 				57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */,
@@ -433,6 +437,7 @@
 				574010291D32C173001B0E3F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		57D799731D2ABE3E008F7C58 /* Build configuration list for PBXProject "AdamsHeart" */ = {
 			isa = XCConfigurationList;
