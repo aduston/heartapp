@@ -20,6 +20,7 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     private var numObs: Double
     private var chartDrawer: ChartDrawer
     private let pinchRec = UIPinchGestureRecognizer()
+    private var pinchStartNumObs: Double?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -38,6 +39,7 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         super.init(frame: frame)
         self.isMultipleTouchEnabled = true
         self.pinchRec.addTarget(self, action: #selector(pinchedView))
+        self.addGestureRecognizer(self.pinchRec)
     }
     
     override func willMove(toSuperview newSuperview: UIView?) {
@@ -58,9 +60,24 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     }
 
     @objc private func pinchedView(sender: UIPinchGestureRecognizer) {
+        if sender.numberOfTouches() != 2 {
+            return
+        }
+        let state = sender.state
         let scale = sender.scale
+        if state == .began {
+            pinchStartNumObs = numObs
+        } else if state == .ended {
+            pinchStartNumObs = nil
+        }
+        if pinchStartNumObs == nil {
+            return
+        }
         // let velocity = sender.velocity
-        numObs = min(Double(data.curObservation + 1), max(0.0, numObs * Double(scale)))
+        numObs = min(Double(data.curObservation + 1), max(0.0, pinchStartNumObs! * Double(1.0 / scale)))
+        if type == .record {
+            startObs = Double(data.curObservation) - numObs + 1.0
+        }
         self.setNeedsDisplay()
     }
 

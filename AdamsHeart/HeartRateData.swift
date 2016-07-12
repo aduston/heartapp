@@ -21,6 +21,13 @@ public class HeartRateData {
         self.observations = [Observation](repeating: 0, count: 60 * 60 * 24)
         self.curObservation = -1
     }
+    
+    init(withStartTime startTime:TimeInterval) {
+        // used for dev only
+        self.observations = [Observation](repeating: 0, count: 60 * 60 * 24)
+        self.curObservation = -1
+        self.startTime = startTime
+    }
 
     public func addObservation(heartRate: UInt8) {
         if curObservation == -1 {

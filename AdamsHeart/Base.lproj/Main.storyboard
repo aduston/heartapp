@@ -66,16 +66,10 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9V3-gG-i13" customClass="HeartRateChart" customModule="AdamsHeart" customModuleProvider="target">
-                                <frame key="frameInset" minX="16" minY="163" width="343" height="195"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <connections>
-                        <outlet property="hrChart" destination="9V3-gG-i13" id="HY4-wm-xFb"/>
                         <outlet property="hrLabel" destination="TKI-Fs-6tH" id="zy2-bN-w8y"/>
                         <outlet property="statusLabel" destination="ZKd-Wo-UET" id="x63-A6-qjg"/>
                     </connections>
