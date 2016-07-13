@@ -18,47 +18,39 @@ import CoreGraphics
 #endif
 
 struct ChartParams {
-    var context: CGContext
-    var rect: CGRect
-    var startObs: Double
-    var numObs: Double
-    var minRate: UInt8
-    var maxRate: UInt8
-    let spaceLeft: CGFloat = 30
-    let spaceBottom: CGFloat = 20
-    let labelFont = NSUIFont(name: "Helvetica", size: 14)!
-    let regularBeatColor = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 1.0])!
-    let halvedBeatColor = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 1.0])!
+    static let spaceLeft: CGFloat = 30
+    static let spaceBottom: CGFloat = 20
+    static let labelFont = NSUIFont(name: "Helvetica", size: 14)!
+    static let regularBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 1.0])!
+    static let halvedBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 1.0])!
+    static let regularBeatFill = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 0.5])!
+    static let halvedBeatFill = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 0.8])!
     
-    var graphRect: CGRect
-    var beatHeight: CGFloat
-    var spread: UInt8
-    var barWidth: CGFloat
+    let context: CGContext
+    let rect: CGRect
+    let startObs: Double
+    let numObs: Double
+    let minRate: UInt8
+    let maxRate: UInt8
+    let graphRect: CGRect
+    let beatHeight: CGFloat
+    let spread: UInt8
+    let barWidth: CGFloat
     
-    init(context: CGContext, rect: CGRect, startObs: Double, numObs: Double, minRate: UInt8, maxRate: UInt8) {
-        self.context = context
-        self.rect = rect
-        self.startObs = startObs
-        self.numObs = numObs
-        self.minRate = minRate
-        self.maxRate = maxRate
-        self.graphRect =
-            CGRect(origin: CGPoint(x: rect.minX + spaceLeft,
-                                   y: rect.minY + spaceBottom),
-                   size: CGSize(width: rect.width - spaceLeft,
-                                height: rect.height - spaceBottom))
-        if maxRate == minRate {
-            beatHeight = 0
-        } else {
-            beatHeight = graphRect.size.height / CGFloat(maxRate - minRate)
-        }
-        spread = maxRate - minRate
-        barWidth = graphRect.width / CGFloat(numObs)
+    static func create(context: CGContext, rect: CGRect, startObs: Double, numObs: Double, minRate: UInt8, maxRate: UInt8) -> ChartParams {
+        let graphRect = CGRect(
+            x: rect.minX + ChartParams.spaceLeft,
+            y: rect.minY + ChartParams.spaceBottom,
+            width: rect.width - ChartParams.spaceLeft,
+            height: rect.height - ChartParams.spaceBottom * 2)
+        let beatHeight = maxRate == minRate ? 0 : graphRect.size.height / CGFloat(maxRate - minRate)
+        let spread = maxRate - minRate
+        let barWidth = graphRect.width / CGFloat(numObs)
+        return ChartParams(context: context, rect: rect, startObs: startObs, numObs: numObs, minRate: minRate, maxRate: maxRate, graphRect: graphRect, beatHeight: beatHeight, spread: spread, barWidth: barWidth)
     }
     
     func yForHR(_ hr: UInt8) -> CGFloat {
-        // TODO: save after first
-        return graphRect.minY + CGFloat(hr - minRate) * beatHeight
+        return graphRect.maxY - (CGFloat(hr - minRate) * beatHeight)
     }
 }
 
@@ -70,10 +62,10 @@ public class ChartDrawer {
     }
     
     public func draw(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) {
-        let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(numObs))
+        let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(ceil(numObs)))
         let maxHR = actualMaxHR + (5 - (actualMaxHR % 5))
         let minHR = actualMinHR - (actualMinHR % 5) - 5
-        let params = ChartParams(
+        let params = ChartParams.create(
             context: context, rect: rect, startObs: startObs,
             numObs: numObs, minRate: minHR, maxRate: maxHR)
         drawBackground(params)
@@ -110,13 +102,13 @@ public class ChartDrawer {
     private func addHRLabel(params: ChartParams, hr: UInt8, y: CGFloat) {
         let label = String(hr) as NSString
         #if os(iOS)
-        let labelSize = label.size(attributes: [NSFontAttributeName: params.labelFont])
+        let labelSize = label.size(attributes: [NSFontAttributeName: ChartParams.labelFont])
         #elseif os(OSX)
         let labelSize = label.size(withAttributes: [NSFontAttributeName: params.labelFont])
         #endif
         let point = CGPoint(x: params.graphRect.minX - 2 - labelSize.width,
                             y: y - (labelSize.height / 2.0))
-        label.draw(at: point, withAttributes: [NSFontAttributeName: params.labelFont])
+        label.draw(at: point, withAttributes: [NSFontAttributeName: ChartParams.labelFont])
     }
     
     private func drawValues(_ params: ChartParams) {
@@ -126,7 +118,8 @@ public class ChartDrawer {
             // TODO: make sure works with runs of constant values
             let c = params.context
             c.setLineWidth(1.0)
-            c.setStrokeColor(params.regularBeatColor)
+            c.setStrokeColor(ChartParams.regularBeatStroke)
+            c.beginPath()
             var inHasHalved = false
             let obsPerPoint = params.numObs / Double(params.graphRect.width)
             for pointNo in 0..<Int(params.graphRect.width) {
@@ -137,20 +130,23 @@ public class ChartDrawer {
                 let minY = params.yForHR(minHR)
                 let x = params.graphRect.minX + CGFloat(pointNo) + 0.5
                 if hasHalved != inHasHalved {
-                    c.setStrokeColor(hasHalved ? params.halvedBeatColor : params.regularBeatColor)
+                    if pointNo > 0 {
+                        c.strokePath()
+                    }
+                    c.beginPath()
+                    c.setStrokeColor(hasHalved ? ChartParams.halvedBeatStroke : ChartParams.regularBeatStroke)
                     inHasHalved = hasHalved
                 }
                 c.moveTo(x: x, y: minY)
                 c.addLineTo(x: x, y: maxY)
-                c.strokePath()
             }
+            c.strokePath()
         }
     }
     
     private func drawWideValues(_ params: ChartParams) {
         let c = params.context
-        c.setLineWidth(5.0)
-        c.setStrokeColor(params.regularBeatColor)
+        c.setFillColor(ChartParams.regularBeatFill)
         var inHasHalved = false
         let startObs = max(0, Int(params.startObs))
         let endObs = min(data.curObservation, Int(ceil(params.startObs + params.numObs)))
@@ -160,20 +156,19 @@ public class ChartDrawer {
         }
         for obsIndex in startObs...endObs {
             let (_, _, halved, hr) = HeartRateData.components(observation: data.observations[obsIndex])
-            let y = params.yForHR(hr)
             if halved != inHasHalved {
-                c.setStrokeColor(halved ? params.halvedBeatColor : params.regularBeatColor)
+                c.setFillColor(halved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill)
                 inHasHalved = halved
             }
-            if obsIndex == startObs {
-                c.moveTo(x: max(curX, params.graphRect.minX), y: y)
-            } else {
-                c.addLineTo(x: curX, y: y)
-            }
-            curX += params.barWidth
-            c.addLineTo(x: min(curX, params.graphRect.maxX), y: y)
+            let y = params.yForHR(hr)
+            let x = max(params.graphRect.minX, curX)
+            let nextX = min(curX + params.barWidth, params.graphRect.maxX)
+            c.fill(CGRect(x: x,
+                          y: y,
+                          width: nextX - x,
+                          height: params.graphRect.maxY - y))
+            curX = nextX
         }
-        c.strokePath()
     }
     
     private func drawTimes(_ params: ChartParams) {
