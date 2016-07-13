@@ -38,11 +38,8 @@ public class HeartRateData {
     }
     
     public func addObservation(heartRate: UInt8, elapsedSeconds: Int) {
-        let minutes = UInt16(elapsedSeconds / 60)
-        let seconds = UInt8(elapsedSeconds % 60)
         observations[Int(curObservation + 1)] = makeObservation(
-            minutes: minutes, seconds: seconds,
-            halved: isHalved(heartRate: heartRate), heartRate: heartRate)
+            seconds: UInt32(elapsedSeconds), halved: isHalved(heartRate: heartRate), heartRate: heartRate)
         curObservation += 1
         if addObservationHandler != nil {
             addObservationHandler!();
@@ -66,20 +63,19 @@ public class HeartRateData {
         }
     }
 
-    private func makeObservation(minutes: UInt16, seconds: UInt8, halved: Bool, heartRate: UInt8) -> Observation {
-        var obs = (UInt32(minutes) << 16) | (UInt32(seconds) << 8) | UInt32(heartRate)
+    private func makeObservation(seconds: UInt32, halved: Bool, heartRate: UInt8) -> Observation {
+        var obs = (seconds << 8) | UInt32(heartRate)
         if halved {
-            obs |= (0x1 << 15)
+            obs |= (0x1 << 31)
         }
         return Observation(obs)
     }
     
-    public static func components(observation: Observation) -> (minutes: UInt16, seconds: UInt8, halved: Bool, heartRate: UInt8) {
-        let minutes = UInt16(observation >> 16)
-        let seconds = UInt8((observation >> 8) & 0x7F)
-        let halved = ((observation >> 8) & 0x80) != 0
+    public static func components(observation: Observation) -> (seconds: UInt32, halved: Bool, heartRate: UInt8) {
+        let seconds = UInt32((observation >> 8) & ~(1 << 23))
+        let halved = (observation >> 31) != 0
         let heartRate = UInt8(observation & 0xFF)
-        return (minutes, seconds, halved, heartRate)
+        return (seconds, halved, heartRate)
     }
     
     public func minAndMax(startObs: Int, numObs: Int) -> (minHR: UInt8, maxHR: UInt8) {
@@ -105,7 +101,7 @@ public class HeartRateData {
         var maxHR: UInt8 = 0
         var hasHalved = false
         for i in minIndex...maxIndex {
-            let (_, _, halved, hr) = HeartRateData.components(observation: observations[i])
+            let (_, halved, hr) = HeartRateData.components(observation: observations[i])
             if halved {
                 hasHalved = true
             }

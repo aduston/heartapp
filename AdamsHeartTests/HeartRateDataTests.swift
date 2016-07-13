@@ -23,14 +23,17 @@ class HeartRateDataTests: XCTestCase {
     
     func testComponents() {
         let data = HeartRateData()
-        data.addObservation(heartRate: 72, elapsedSeconds: 0)
-        data.addObservation(heartRate: 74, elapsedSeconds: 1)
-        data.addObservation(heartRate: 75, elapsedSeconds: 62)
-        let (minutes, seconds, halved, heartRate) = HeartRateData.components(observation: data.observations[2])
-        XCTAssertEqual(1, minutes)
-        XCTAssertEqual(2, seconds)
+        data.addObservation(heartRate: 180, elapsedSeconds: 72014)
+        var (seconds, halved, heartRate) = HeartRateData.components(observation: data.observations[0])
+        XCTAssertEqual(72014, seconds)
         XCTAssertEqual(false, halved)
-        XCTAssertEqual(75, heartRate)
+        XCTAssertEqual(180, heartRate)
+        
+        data.addObservation(heartRate: 90, elapsedSeconds: 72015)
+        (seconds, halved, heartRate) = HeartRateData.components(observation: data.observations[1])
+        XCTAssertEqual(72015, seconds)
+        XCTAssertEqual(true, halved)
+        XCTAssertEqual(90, heartRate)
     }
     
     func testAdd() {

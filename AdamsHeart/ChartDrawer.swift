@@ -155,7 +155,7 @@ public class ChartDrawer {
             curX -= params.barWidth * CGFloat(params.startObs - Double(startObs))
         }
         for obsIndex in startObs...endObs {
-            let (_, _, halved, hr) = HeartRateData.components(observation: data.observations[obsIndex])
+            let (_, halved, hr) = HeartRateData.components(observation: data.observations[obsIndex])
             if halved != inHasHalved {
                 c.setFillColor(halved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill)
                 inHasHalved = halved
