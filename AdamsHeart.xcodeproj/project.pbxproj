@@ -10,6 +10,8 @@
 		5740102D1D32C22F001B0E3F /* HeartRateDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */; };
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
 		574E44811D3581FB000D69BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44801D3581FB000D69BC /* Session.swift */; };
+		574E44881D3694C1000D69BC /* SessionStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44871D3694C1000D69BC /* SessionStorage.swift */; };
+		574E448A1D3694D2000D69BC /* SessionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44891D3694D2000D69BC /* SessionData.swift */; };
 		57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */; };
 		57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */; };
 		57D799811D2ABE3F008F7C58 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D7997F1D2ABE3F008F7C58 /* Main.storyboard */; };
@@ -41,6 +43,8 @@
 		5740102C1D32C22F001B0E3F /* HeartRateDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateDataTests.swift; sourceTree = "<group>"; };
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
 		574E44801D3581FB000D69BC /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
+		574E44871D3694C1000D69BC /* SessionStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionStorage.swift; path = Storage/SessionStorage.swift; sourceTree = "<group>"; };
+		574E44891D3694D2000D69BC /* SessionData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionData.swift; path = Storage/SessionData.swift; sourceTree = "<group>"; };
 		57D799781D2ABE3F008F7C58 /* AdamsHeart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdamsHeart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -85,6 +89,15 @@
 			path = AdamsHeartTests;
 			sourceTree = "<group>";
 		};
+		574E44841D368C4B000D69BC /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				574E44891D3694D2000D69BC /* SessionData.swift */,
+				574E44871D3694C1000D69BC /* SessionStorage.swift */,
+			);
+			name = Storage;
+			sourceTree = "<group>";
+		};
 		57D7996F1D2ABE3E008F7C58 = {
 			isa = PBXGroup;
 			children = (
@@ -106,6 +119,7 @@
 		57D7997A1D2ABE3F008F7C58 /* AdamsHeart */ = {
 			isa = PBXGroup;
 			children = (
+				574E44841D368C4B000D69BC /* Storage */,
 				57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */,
 				57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */,
 				57D7998D1D2ABFBD008F7C58 /* RecordViewController.swift */,
@@ -244,6 +258,7 @@
 			files = (
 				57D7998E1D2ABFBD008F7C58 /* RecordViewController.swift in Sources */,
 				574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */,
+				574E448A1D3694D2000D69BC /* SessionData.swift in Sources */,
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,
 				57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */,
 				57D7999A1D2ADE07008F7C58 /* DevHeartRateMonitor.swift in Sources */,
@@ -253,6 +268,7 @@
 				574E44811D3581FB000D69BC /* Session.swift in Sources */,
 				57D7999C1D2B3181008F7C58 /* HeartRateData.swift in Sources */,
 				57D799981D2AD768008F7C58 /* BLEHeartRateMonitor.swift in Sources */,
+				574E44881D3694C1000D69BC /* SessionStorage.swift in Sources */,
 				57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
