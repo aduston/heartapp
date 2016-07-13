@@ -14,12 +14,19 @@ public typealias AddObservationHandler = () -> ()
 public class HeartRateData {
     public var observations: [Observation]
     public var curObservation: Int
+    private var isLocked: Bool = false
     private var startTime: TimeInterval = 0
     private var addObservationHandler: AddObservationHandler?
 
     init() {
         self.observations = [Observation](repeating: 0, count: 60 * 60 * 24)
         self.curObservation = -1
+    }
+    
+    init(observations: [Observation]) {
+        self.observations = observations
+        self.curObservation = self.observations.count - 1
+        self.isLocked = true
     }
     
     init(withStartTime startTime:TimeInterval) {
@@ -38,6 +45,10 @@ public class HeartRateData {
     }
     
     public func addObservation(heartRate: UInt8, elapsedSeconds: Int) {
+        if isLocked {
+            // TODO: fatal
+            return
+        }
         observations[Int(curObservation + 1)] = makeObservation(
             seconds: UInt32(elapsedSeconds), halved: isHalved(heartRate: heartRate), heartRate: heartRate)
         curObservation += 1
@@ -113,5 +124,30 @@ public class HeartRateData {
             }
         }
         return (minHR, maxHR, hasHalved)
+    }
+    
+    public static func observationsToData(observations: [UInt32]) -> Data {
+        var bytes = [UInt8](repeating: 0, count: observations.count * 4)
+        for i in 0..<observations.count {
+            bytes[i * 4] = UInt8(observations[i] >> 24)
+            bytes[i * 4 + 1] = UInt8(observations[i] >> 16)
+            bytes[i * 4 + 2] = UInt8(observations[i] >> 8)
+            bytes[i * 4 + 3] = UInt8(observations[i])
+        }
+        return Data(bytes: bytes)
+    }
+    
+    public static func dataToObservations(data: Data) -> [UInt32] {
+        var bytes: [UInt8] = [UInt8](repeating: 0, count: data.count)
+        data.copyBytes(to: &bytes, count: data.count)
+        var observations = [UInt32](repeating: 0, count: data.count / 4)
+        for i in 0..<bytes.count {
+            observations[i] =
+                UInt32(bytes[i / 4] << 24) &
+                UInt32(bytes[i / 4 + 1] << 16) &
+                UInt32(bytes[i / 4 + 2] << 24) &
+                UInt32(bytes[i / 4 + 3])
+        }
+        return observations
     }
 }
