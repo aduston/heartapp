@@ -56,6 +56,7 @@ class SessionStorage {
             return nil
         }
         let data = fh?.readDataToEndOfFile()
+        fh?.closeFile()
         return HeartRateData.dataToObservations(data: data!)
     }
     
