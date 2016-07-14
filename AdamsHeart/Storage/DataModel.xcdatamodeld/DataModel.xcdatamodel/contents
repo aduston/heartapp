@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11147.23" systemVersion="15F34" minimumToolsVersion="Xcode 7.0" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="SessionMetadata" representedClassName="SessionMetadataMO" syncable="YES">
+        <attribute name="onServerAtt" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" indexed="YES" syncable="YES"/>
+        <attribute name="timestampAtt" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" indexed="YES" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="SessionMetadata" positionX="-63" positionY="-18" width="128" height="75"/>
+    </elements>
+</model>

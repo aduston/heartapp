@@ -126,27 +126,20 @@ public class HeartRateData {
         return (minHR, maxHR, hasHalved)
     }
     
-    public static func observationsToData(observations: [UInt32]) -> Data {
+    public static func observationsToData(observations: [Observation]) -> Data {
         var bytes = [UInt8](repeating: 0, count: observations.count * 4)
         for i in 0..<observations.count {
-            bytes[i * 4] = UInt8(observations[i] >> 24)
-            bytes[i * 4 + 1] = UInt8(observations[i] >> 16)
-            bytes[i * 4 + 2] = UInt8(observations[i] >> 8)
-            bytes[i * 4 + 3] = UInt8(observations[i])
+            copyBytes(source: observations[i], destination: &bytes, offset: i * 4)
         }
         return Data(bytes: bytes)
     }
     
-    public static func dataToObservations(data: Data) -> [UInt32] {
+    public static func dataToObservations(data: Data) -> [Observation] {
         var bytes: [UInt8] = [UInt8](repeating: 0, count: data.count)
         data.copyBytes(to: &bytes, count: data.count)
         var observations = [UInt32](repeating: 0, count: data.count / 4)
         for i in 0..<bytes.count {
-            observations[i] =
-                UInt32(bytes[i / 4] << 24) &
-                UInt32(bytes[i / 4 + 1] << 16) &
-                UInt32(bytes[i / 4 + 2] << 24) &
-                UInt32(bytes[i / 4 + 3])
+            observations[i] = makeInt(bytes: &bytes, offset: i / 4)
         }
         return observations
     }

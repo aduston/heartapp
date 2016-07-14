@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 class SessionStorage {
     private var baseDirectory: URL
@@ -21,48 +22,46 @@ class SessionStorage {
         self.baseDirectory = baseDirectory
     }
     
-    func saveSession(timestamp: UInt32, observations: [UInt32], callback: (Bool) -> ()) {
-        DispatchQueue.global(attributes: .qosUserInteractive).async(execute: {
-            let success = self.saveSession(timestamp: timestamp, observations: observations)
-            DispatchQueue.main.async(execute: { callback(success) })
-        })
+    func saveSession(timestamp: UInt32, observations: [UInt32]) -> Bool {
+        ensureDataDir()
+        writeObservations(timestamp: timestamp, observations: observations)
+        writeImage(timestamp: timestamp, observations: observations)
+        writeSessionMetadataRecord(timestamp)
+        return true // TODO: account for other possible errors
     }
     
-    func numSessions() -> Int {
-        let url = listingFileURL
-        let fm = FileManager.default()
-        if fm.fileExists(atPath: url.path!) {
-            do {
-                let attributes = try fm.attributesOfItem(atPath: url.path!)
-                return (attributes[FileAttributeKey.size.rawValue] as! NSNumber).intValue / 4
-            } catch {
-                // TODO: log me.
-                return 0
-            }
-        } else {
-            return 0
+    func listSessions(timestampsLessThan: UInt32, limit: Int) -> [SessionMetadataMO]? {
+        let moc = coreDataController.managedObjectContext
+        let sessionsFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
+        sessionsFetch.predicate = Predicate(format: "timestampAtt < %@", NSNumber(value: timestampsLessThan))
+        sessionsFetch.sortDescriptors = [SortDescriptor(key: "timestampAtt", ascending: false)]
+        sessionsFetch.fetchLimit = limit
+        do {
+            return try moc.fetch(sessionsFetch)
+        } catch {
+            return nil
         }
-    }
-    
-    func listSessions(offset: Int, count: Int, callback: () -> [UInt32]) {
-        
     }
     
     func chartImageURL(timestamp: UInt32) -> URL {
         return URL(fileURLWithPath: "data/\(timestamp).png", relativeTo: baseDirectory)
     }
     
-    func sessionObservations(timestamp: UInt32, callback: () -> [UInt32]) {
-        
+    func sessionObservations(timestamp: UInt32) -> [Observation]? {
+        var fh: FileHandle?
+        do {
+            fh = try FileHandle(forReadingFrom: observationsFileURL(timestamp: timestamp))
+        } catch {
+            // TODO: what to do?
+            return nil
+        }
+        let data = fh?.readDataToEndOfFile()
+        return HeartRateData.dataToObservations(data: data!)
     }
     
-    func sessionData(timestamp: UInt32, callback: () -> SessionMetadata) {
-        
-    }
-    
-    private var listingFileURL: URL {
-        return URL(fileURLWithPath: "listing", relativeTo: baseDirectory)
-    }
+    private lazy var coreDataController: CoreDataController = {
+        return CoreDataController(async: false)
+    }()
     
     private func metadataFileURL(timestamp: UInt32) -> URL {
         return URL(fileURLWithPath: "data/\(timestamp).json", relativeTo: baseDirectory)
@@ -70,15 +69,6 @@ class SessionStorage {
     
     private func observationsFileURL(timestamp: UInt32) -> URL {
         return URL(fileURLWithPath: "data/\(timestamp).hr", relativeTo: baseDirectory)
-    }
-    
-    private func saveSession(timestamp: UInt32, observations: [UInt32]) -> Bool {
-        ensureDataDir()
-        writeMetadata(timestamp: timestamp, observations: observations)
-        writeObservations(timestamp: timestamp, observations: observations)
-        writeImage(timestamp: timestamp, observations: observations)
-        writeListingRecord(timestamp)
-        return true // TODO: account for possible errors
     }
     
     private func ensureDataDir() {
@@ -91,10 +81,6 @@ class SessionStorage {
                 // TODO: log me
             }
         }
-    }
-    
-    private func writeMetadata(timestamp: UInt32, observations: [UInt32]) {
-        // TODO: write me after you can de/serialize json
     }
     
     private func writeObservations(timestamp: UInt32, observations: [UInt32]) {
@@ -119,11 +105,15 @@ class SessionStorage {
         do {
             try UIImagePNGRepresentation(image)?.write(to: chartImageURL(timestamp: timestamp))
         } catch {
-            // TODO: log me
+            // TODO: log me, return false or throw error
         }
     }
     
-    private func writeListingRecord(_ timestamp: UInt32) {
-        
+    private func writeSessionMetadataRecord(_ timestamp: UInt32) {
+        let moc = coreDataController.managedObjectContext
+        let sessionMetadata = NSEntityDescription.insertNewObject(forEntityName: "SessionMetadata", into: moc) as! SessionMetadataMO
+        sessionMetadata.onServer = false
+        sessionMetadata.timestamp = timestamp
+        coreDataController.save()
     }
 }
