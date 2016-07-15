@@ -65,8 +65,8 @@ class SessionStorage {
         return HeartRateData.dataToObservations(data: data!)
     }
     
-    private lazy var coreDataController: CoreDataController = {
-        return CoreDataController(async: false)
+    lazy var coreDataController: CoreDataController = {
+        return CoreDataController()
     }()
     
     private func metadataFileURL(timestamp: UInt32) -> URL {

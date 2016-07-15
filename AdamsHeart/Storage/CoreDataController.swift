@@ -12,7 +12,7 @@ import Foundation
 class CoreDataController {
     var managedObjectContext: NSManagedObjectContext
 
-    init(async: Bool) {
+    init() {
         // This resource is the same name as your xcdatamodeld contained in your project.
         guard let modelURL = Bundle.main().urlForResource("DataModel", withExtension: "momd") else {
             fatalError("Error loading model from bundle")
@@ -24,13 +24,7 @@ class CoreDataController {
         let psc = NSPersistentStoreCoordinator(managedObjectModel: mom)
         managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = psc
-        if async {
-            DispatchQueue.global(attributes: .qosBackground).async {
-                self.addPersistentStore(psc: psc)
-            }
-        } else {
-            addPersistentStore(psc: psc)
-        }
+        addPersistentStore(psc: psc)
     }
     
     private func addPersistentStore(psc : NSPersistentStoreCoordinator) {
