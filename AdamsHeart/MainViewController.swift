@@ -36,6 +36,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
         sessionTable!.dataSource = self.sessionTableDataSource!
         sessionTable!.separatorStyle = .none
         sessionTable!.reloadData()
+        self.sessionTableDataSource?.tableView = sessionTable
     }
 
     override func didReceiveMemoryWarning() {

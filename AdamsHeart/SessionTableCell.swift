@@ -18,6 +18,12 @@ class SessionTableCell: UITableViewCell {
     private var chartImage: UIImageView!
     private var label: UILabel!
     
+    private static var dateTimeFormat: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "M/d/yyyy h:mm a"
+        return df
+    }()
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = UIColor.white()
@@ -45,7 +51,8 @@ class SessionTableCell: UITableViewCell {
     }
     
     func setRecord(record: SessionMetadataMO) {
-        label.text = "\(record.timestampValue)"
+        let date = Date(timeIntervalSinceReferenceDate: TimeInterval(record.timestampValue))
+        label.text = "\(SessionTableCell.dateTimeFormat.string(from: date))"
         let ss = SessionStorage.instance
         chartImage.image = UIImage(contentsOfFile: ss.chartImageURL(timestamp: record.timestampValue).path!)
         setNeedsLayout() // TODO: is this necessary?

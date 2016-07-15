@@ -13,6 +13,7 @@ import CoreData
 class SessionTableDataSource: NSObject, UITableViewDataSource, NSFetchedResultsControllerDelegate {
     static let cellId = "sessionCell"
     private var fetchedResultsController: NSFetchedResultsController<SessionMetadataMO>!
+    var tableView: UITableView?
     
     init(moc: NSManagedObjectContext) {
         super.init()
@@ -39,5 +40,33 @@ class SessionTableDataSource: NSObject, UITableViewDataSource, NSFetchedResultsC
         let sessionMetadata = fetchedResultsController.object(at: indexPath)
         cell.setRecord(record: sessionMetadata)
         return cell
+    }
+    
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if tableView != nil {
+            tableView!.beginUpdates()
+        }
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if tableView != nil {
+            tableView!.endUpdates()
+        }
+    }
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: AnyObject, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        guard tableView != nil else {
+            return
+        }
+        switch type {
+        case .insert:
+            tableView!.insertRows(at: [newIndexPath!], with: .fade)
+        case .delete:
+            tableView!.deleteRows(at: [indexPath!], with: .fade)
+        case .update:
+            break
+        case .move:
+            break
+        }
     }
 }
