@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import CoreData
 
-class MainViewController: UIViewController {
+class MainViewController: UIViewController, UITableViewDelegate {
     @IBOutlet weak var sessionTable: UITableView?
     var sessionTableDataSource: SessionTableDataSource?
 
@@ -22,12 +23,19 @@ class MainViewController: UIViewController {
                 DispatchQueue.main.async {
                     // TODO: should the following instantiation be in main thread?
                     self.sessionTableDataSource = SessionTableDataSource(moc: moc)
-                    self.sessionTable?.dataSource = self.sessionTableDataSource!
-                    self.sessionTable?.reloadData()
+                    self.setUpTable()
                     // TODO: get rid of loading screen.
                 }
             }
         }
+    }
+    
+    private func setUpTable() {
+        sessionTable!.register(SessionTableCell.self, forCellReuseIdentifier: SessionTableDataSource.cellId)
+        sessionTable!.delegate = self
+        sessionTable!.dataSource = self.sessionTableDataSource!
+        sessionTable!.separatorStyle = .none
+        sessionTable!.reloadData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -35,5 +43,8 @@ class MainViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return SessionTableCell.cellHeight
+    }
 }
 

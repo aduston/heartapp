@@ -97,7 +97,7 @@ class SessionStorage {
     }
     
     private func writeImage(timestamp: UInt32, observations: [Observation]) {
-        let size = CGSize(width: 355, height: 200)
+        let size = SessionTableCell.imageSize
         UIGraphicsBeginImageContextWithOptions(size, true, CGFloat(0.0))
         let context = UIGraphicsGetCurrentContext()!
         let drawer = ChartDrawer(data: HeartRateData(observations: observations))
