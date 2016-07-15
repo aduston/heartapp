@@ -9,25 +9,46 @@
 import Foundation
 import CoreData
 
+@objc(SessionMetadataMO)
 class SessionMetadataMO: NSManagedObject {
-    @NSManaged var timestampAtt: NSNumber
-    @NSManaged var onServerAtt: NSNumber
+    @NSManaged var timestamp: NSNumber
+    @NSManaged var onServer: NSNumber
+    @NSManaged var maxHR: NSNumber?
+    @NSManaged var halvedCount: NSNumber?
     
-    var timestamp: UInt32 {
+    var timestampValue: UInt32 {
         get {
-            return timestampAtt.uint32Value
+            return timestamp.uint32Value
         }
         set {
-            timestampAtt = NSNumber(value: newValue)
+            timestamp = NSNumber(value: newValue)
         }
     }
     
-    var onServer: Bool {
+    var onServerValue: Bool {
         get {
-            return onServerAtt.boolValue
+            return onServer.boolValue
         }
         set {
-            onServerAtt = NSNumber(booleanLiteral: newValue)
+            onServer = NSNumber(booleanLiteral: newValue)
+        }
+    }
+    
+    var maxHRValue: UInt8? {
+        get {
+            return maxHR?.uint8Value
+        }
+        set {
+            maxHR = NSNumber(value: newValue!)
+        }
+    }
+    
+    var halvedCountValue: UInt32? {
+        get {
+            return halvedCount?.uint32Value
+        }
+        set {
+            halvedCount = NSNumber(value: newValue!)
         }
     }
 }

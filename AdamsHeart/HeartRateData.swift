@@ -129,7 +129,11 @@ public class HeartRateData {
     public static func observationsToData(observations: [Observation]) -> Data {
         var bytes = [UInt8](repeating: 0, count: observations.count * 4)
         for i in 0..<observations.count {
-            copyBytes(source: observations[i], destination: &bytes, offset: i * 4)
+            let offset = i * 4
+            bytes[offset] = UInt8((observations[i] >> 24) & 0xFF)
+            bytes[offset + 1] = UInt8((observations[i] >> 16) & 0xFF)
+            bytes[offset + 2] = UInt8((observations[i] >> 8) & 0xFF)
+            bytes[offset + 3] = UInt8(observations[i] & 0xFF)
         }
         return Data(bytes: bytes)
     }
@@ -139,7 +143,12 @@ public class HeartRateData {
         data.copyBytes(to: &bytes, count: data.count)
         var observations = [UInt32](repeating: 0, count: data.count / 4)
         for i in 0..<bytes.count {
-            observations[i] = makeInt(bytes: &bytes, offset: i / 4)
+            let offset = i / 4
+            observations[i] =
+                (UInt32(bytes[offset]) << 24) &
+                (UInt32(bytes[offset + 1]) << 16) &
+                (UInt32(bytes[offset + 2]) << 8) &
+                UInt32(bytes[offset + 3])
         }
         return observations
     }

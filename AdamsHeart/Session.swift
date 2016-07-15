@@ -20,8 +20,16 @@ class Session: HeartRateDelegate {
         return instance!
     }
     
+    static func stop() -> Session? {
+        instance?.stop()
+        let existingInstance = instance
+        instance = nil
+        return existingInstance
+    }
+    
     private var _data: HeartRateData
     private var _monitor: HeartRateMonitor?
+    private var _sessionStart: UInt32?
     private var _status: String?
     private var _delegate: HeartRateDelegate?
     
@@ -50,12 +58,31 @@ class Session: HeartRateDelegate {
     }
     
     func heartRateDataArrived(data: HeartRateDataPoint) {
+        if _sessionStart == nil {
+            _sessionStart = UInt32(Date().timeIntervalSinceReferenceDate)
+        }
         _data.addObservation(heartRate: UInt8(data.hr))
         _delegate?.heartRateDataArrived(data: data)
     }
     
+    func stop() {
+        _monitor!.stop()
+    }
+    
+    var recordedObservations: [Observation] {
+        var recorded = [Observation](repeating: 0, count: data.curObservation + 1)
+        for i in 0...data.curObservation {
+            recorded[i] = data.observations[i]
+        }
+        return recorded
+    }
+    
     var status: String? {
         return _status
+    }
+    
+    var sessionStart: UInt32? {
+        return _sessionStart
     }
 
     var delegate: HeartRateDelegate? {

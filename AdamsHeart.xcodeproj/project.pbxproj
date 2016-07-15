@@ -26,7 +26,6 @@
 		57D7999C1D2B3181008F7C58 /* HeartRateData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7999B1D2B3181008F7C58 /* HeartRateData.swift */; };
 		57D7999E1D2B3610008F7C58 /* HeartRateChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */; };
 		57EFFC6D1D3716D7008FB3BF /* SwiftyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EFFC6C1D3716D7008FB3BF /* SwiftyJSON.swift */; };
-		57EFFC6F1D372167008FB3BF /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EFFC6E1D372167008FB3BF /* Util.swift */; };
 		57EFFC711D37C42E008FB3BF /* CoreDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EFFC701D37C42E008FB3BF /* CoreDataController.swift */; };
 		57EFFC741D37C781008FB3BF /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 57EFFC721D37C781008FB3BF /* DataModel.xcdatamodeld */; };
 		57F48F0D1D37DB23006E034C /* SessionMetadataMO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F48F0C1D37DB23006E034C /* SessionMetadataMO.swift */; };
@@ -66,7 +65,6 @@
 		57D7999B1D2B3181008F7C58 /* HeartRateData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateData.swift; sourceTree = "<group>"; };
 		57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeartRateChart.swift; sourceTree = "<group>"; };
 		57EFFC6C1D3716D7008FB3BF /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SwiftyJSON.swift; path = ../../SwiftyJSON/Source/SwiftyJSON.swift; sourceTree = "<group>"; };
-		57EFFC6E1D372167008FB3BF /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		57EFFC701D37C42E008FB3BF /* CoreDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataController.swift; path = Storage/CoreDataController.swift; sourceTree = "<group>"; };
 		57EFFC731D37C781008FB3BF /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		57F48F0C1D37DB23006E034C /* SessionMetadataMO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionMetadataMO.swift; path = Storage/SessionMetadataMO.swift; sourceTree = "<group>"; };
@@ -150,7 +148,6 @@
 				57D7999D1D2B3610008F7C58 /* HeartRateChart.swift */,
 				574524E71D313D8E00947F94 /* ChartDrawer.swift */,
 				574E44801D3581FB000D69BC /* Session.swift */,
-				57EFFC6E1D372167008FB3BF /* Util.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -274,7 +271,6 @@
 			files = (
 				57D7998E1D2ABFBD008F7C58 /* RecordViewController.swift in Sources */,
 				574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */,
-				57EFFC6F1D372167008FB3BF /* Util.swift in Sources */,
 				57EFFC6D1D3716D7008FB3BF /* SwiftyJSON.swift in Sources */,
 				57EFFC711D37C42E008FB3BF /* CoreDataController.swift in Sources */,
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,

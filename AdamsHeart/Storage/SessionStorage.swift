@@ -11,6 +11,11 @@ import UIKit
 import CoreData
 
 class SessionStorage {
+    /**
+     Use this instead of the constructors
+     */
+    static var instance = SessionStorage() // see https://developer.apple.com/swift/blog/?id=7
+    
     private var baseDirectory: URL
     
     convenience init() {
@@ -22,7 +27,7 @@ class SessionStorage {
         self.baseDirectory = baseDirectory
     }
     
-    func saveSession(timestamp: UInt32, observations: [UInt32]) -> Bool {
+    func saveSession(timestamp: UInt32, observations: [Observation]) -> Bool {
         ensureDataDir()
         writeObservations(timestamp: timestamp, observations: observations)
         writeImage(timestamp: timestamp, observations: observations)
@@ -33,8 +38,8 @@ class SessionStorage {
     func listSessions(timestampsLessThan: UInt32, limit: Int) -> [SessionMetadataMO]? {
         let moc = coreDataController.managedObjectContext
         let sessionsFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
-        sessionsFetch.predicate = Predicate(format: "timestampAtt < %@", NSNumber(value: timestampsLessThan))
-        sessionsFetch.sortDescriptors = [SortDescriptor(key: "timestampAtt", ascending: false)]
+        sessionsFetch.predicate = Predicate(format: "timestamp < %@", NSNumber(value: timestampsLessThan))
+        sessionsFetch.sortDescriptors = [SortDescriptor(key: "timestamp", ascending: false)]
         sessionsFetch.fetchLimit = limit
         do {
             return try moc.fetch(sessionsFetch)
@@ -84,14 +89,14 @@ class SessionStorage {
         }
     }
     
-    private func writeObservations(timestamp: UInt32, observations: [UInt32]) {
+    private func writeObservations(timestamp: UInt32, observations: [Observation]) {
         let fileURL = observationsFileURL(timestamp: timestamp)
         let fm = FileManager.default()
         // TODO: could return false
         fm.createFile(atPath: fileURL.path!, contents: HeartRateData.observationsToData(observations: observations), attributes: nil)
     }
     
-    private func writeImage(timestamp: UInt32, observations: [UInt32]) {
+    private func writeImage(timestamp: UInt32, observations: [Observation]) {
         let size = CGSize(width: 355, height: 200)
         UIGraphicsBeginImageContextWithOptions(size, true, CGFloat(0.0))
         let context = UIGraphicsGetCurrentContext()!
@@ -113,8 +118,8 @@ class SessionStorage {
     private func writeSessionMetadataRecord(_ timestamp: UInt32) {
         let moc = coreDataController.managedObjectContext
         let sessionMetadata = NSEntityDescription.insertNewObject(forEntityName: "SessionMetadata", into: moc) as! SessionMetadataMO
-        sessionMetadata.onServer = false
-        sessionMetadata.timestamp = timestamp
+        sessionMetadata.onServerValue = false
+        sessionMetadata.timestampValue = timestamp
         coreDataController.save()
     }
 }

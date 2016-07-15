@@ -10,6 +10,7 @@ import UIKit
 
 class RecordViewController: UIViewController, HeartRateDelegate {
     private var heartRateData: HeartRateData?
+    private var stopController: UIAlertController?
     @IBOutlet weak var statusLabel: UILabel?
     @IBOutlet weak var hrLabel: UILabel?
     
@@ -47,5 +48,61 @@ class RecordViewController: UIViewController, HeartRateDelegate {
     
     func heartRateDataArrived(data: HeartRateDataPoint) {
         hrLabel?.text = String(data.hr)
+    }
+    
+    @IBAction func doneClicked(sender: UIButton) {
+        self.present(createStopController(), animated: true, completion: nil)
+    }
+    
+    private func createStopController() -> UIAlertController {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        let destroyAction = UIAlertAction(title: "Destroy", style: .destructive) {(action) in
+            self.showDestroyAlert()
+        }
+        alertController.addAction(destroyAction)
+        let saveAction = UIAlertAction(title: "Save", style: .default) {(action) in
+            let session = Session.stop()
+            self.saveDataAndExit(session: session)
+        }
+        alertController.addAction(saveAction)
+        return alertController
+    }
+    
+    private func saveDataAndExit(session: Session?) {
+        guard session != nil else {
+            exitRecording()
+            return
+        }
+        guard session!.sessionStart != nil else {
+            exitRecording()
+            return
+        }
+        // TODO: show loading screen, disable interaction
+        DispatchQueue.global(attributes: .qosUserInteractive).async {
+            // TODO: use return value
+            _ = SessionStorage.instance.saveSession(
+                timestamp: session!.sessionStart!,
+                observations: session!.recordedObservations)
+            DispatchQueue.main.async {
+                // TODO stop showing loading screen, re-enable interaction
+                self.exitRecording()
+            }
+        }
+    }
+    
+    private func showDestroyAlert() {
+        let alertController = UIAlertController(title: "Are you sure?", message: "You'll lose your session", preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        let destroyAction = UIAlertAction(title: "Destroy", style: .destructive) {(action) in
+            _ = Session.stop()
+            self.exitRecording()
+        }
+        alertController.addAction(destroyAction)
+        self.present(alertController, animated: false, completion: nil)
+    }
+    
+    private func exitRecording() {
+        dismiss(animated: true, completion: nil)
     }
 }
