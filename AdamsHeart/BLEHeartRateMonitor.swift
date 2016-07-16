@@ -165,6 +165,9 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
             rrInterval = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + curOffset)[0])
             rrInterval = UInt16(Double(rrInterval!) / 1024.0 * 1000.0)
         }
+        // TODO: is this the right sequence of calls to dealloc?
+        bytes.deinitialize()
+        bytes.deallocateCapacity(data.count)
         let dataPoint = HeartRateDataPoint(
             hr: hr, sensorContact: sensorContact,
             energy: energy, rrInterval: rrInterval)
