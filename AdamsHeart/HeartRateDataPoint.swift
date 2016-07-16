@@ -11,6 +11,6 @@ import Foundation
 struct HeartRateDataPoint {
     var hr: UInt16
     var sensorContact: UInt8
-    var energy: UInt16
-    var rrInterval: UInt16
+    var energy: UInt16?
+    var rrInterval: UInt16?
 }

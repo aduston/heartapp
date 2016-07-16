@@ -39,11 +39,19 @@ class RecordViewController: UIViewController, HeartRateDelegate {
     }
     
     func heartRateServiceDidConnect(name: String) {
-        statusLabel?.text = name
+        statusLabel!.text = name
     }
 
     func heartRateServiceDidDisconnect() {
-        
+        statusLabel!.text = "(Disconnected)"
+    }
+    
+    func bluetoothTurnedOff() {
+        statusLabel!.text = "Bluetooth turned off"
+    }
+    
+    func connectionUpdate(_ status: String) {
+        statusLabel!.text = status
     }
     
     func heartRateDataArrived(data: HeartRateDataPoint) {

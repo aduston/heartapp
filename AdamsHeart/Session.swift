@@ -50,11 +50,15 @@ class Session: HeartRateDelegate {
     
     func heartRateServiceDidConnect(name: String) {
         _status = name
-        _delegate?.heartRateServiceDidConnect(name: name)
+        if _delegate != nil {
+            _delegate!.heartRateServiceDidConnect(name: name)
+        }
     }
     
     func heartRateServiceDidDisconnect() {
-        _delegate?.heartRateServiceDidDisconnect()
+        if _delegate != nil {
+            _delegate!.heartRateServiceDidDisconnect()
+        }
     }
     
     func heartRateDataArrived(data: HeartRateDataPoint) {
@@ -62,7 +66,22 @@ class Session: HeartRateDelegate {
             _sessionStart = UInt32(Date().timeIntervalSinceReferenceDate)
         }
         _data.addObservation(heartRate: UInt8(data.hr))
-        _delegate?.heartRateDataArrived(data: data)
+        if _delegate != nil {
+            _delegate!.heartRateDataArrived(data: data)
+        }
+    }
+    
+    func bluetoothTurnedOff() {
+        if _delegate != nil {
+            _delegate!.bluetoothTurnedOff()
+        }
+    }
+    
+    func connectionUpdate(_ status: String) {
+        _status = status
+        if _delegate != nil {
+            _delegate?.connectionUpdate(status)
+        }
     }
     
     func stop() {

@@ -52,7 +52,7 @@ class SessionTableCell: UITableViewCell {
     
     func setRecord(record: SessionMetadataMO) {
         let date = Date(timeIntervalSinceReferenceDate: TimeInterval(record.timestampValue))
-        label.text = "\(SessionTableCell.dateTimeFormat.string(from: date))"
+        label.text = SessionTableCell.dateTimeFormat.string(from: date)
         let ss = SessionStorage.instance
         chartImage.image = UIImage(contentsOfFile: ss.chartImageURL(timestamp: record.timestampValue).path!)
         setNeedsLayout() // TODO: is this necessary?

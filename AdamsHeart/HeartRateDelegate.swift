@@ -9,6 +9,8 @@
 import Foundation
 
 protocol HeartRateDelegate: class {
+    func bluetoothTurnedOff()
+    func connectionUpdate(_ status: String)
     func heartRateServiceDidConnect(name: String)
     func heartRateServiceDidDisconnect()
     func heartRateDataArrived(data: HeartRateDataPoint)

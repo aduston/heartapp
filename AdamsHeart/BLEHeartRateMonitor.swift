@@ -13,52 +13,103 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
     struct HeartRateFlags {
         var hrFormat: UInt8
         var sensorContact: UInt8
-        var energyExpended: UInt8
-        var rrInterval: UInt8
+        var energyExpended: Bool
+        var rrInterval: Bool
         init(flag : UInt8) {
-            hrFormat = flag & 0x1;
-            sensorContact = (flag >> 1) & 0x3;
-            energyExpended = (flag >> 3) & 0x1;
-            rrInterval = (flag >> 4) & 0x1;
+            hrFormat = flag & 0x1
+            sensorContact = (flag >> 1) & 0x3
+            energyExpended = ((flag >> 3) & 0x1) != 0
+            rrInterval = ((flag >> 4) & 0x1) != 0
         }
-        func getHRSize() -> Int {
+        var hrSize: Int {
             return Int(hrFormat) + 1;
         }
     }
+
     let heartRateServiceUUID = CBUUID(string: "180D");
     let heartRateMeasurementUUID = CBUUID(string: "2A37");
     
-    private var delegate: HeartRateDelegate;
+    private var delegate: HeartRateDelegate?;
+    private var running: Bool
+    private var manager: CBCentralManager?
+    private var connectedPeripheral: CBPeripheral?
 
     init(delegate: HeartRateDelegate) {
+        running = false
         self.delegate = delegate;
+        super.init()
+        manager = CBCentralManager(delegate: self, queue: nil)
     }
     
     func start() {
-        
+        running = true
+        if manager!.state != .poweredOn {
+            // TODO: log
+            delegate!.bluetoothTurnedOff()
+        } else {
+            scanForPeripherals()
+        }
     }
     
     func stop() {
-        
+        running = false
+        // TODO
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        guard central.state == .poweredOn else {
+        guard running else {
             return
         }
-        
+        // TODO: log this
+        if manager!.state == .poweredOn {
+            scanForPeripherals()
+        }
     }
     
+    private func scanForPeripherals() {
+        delegate!.connectionUpdate("Scanning for peripherals")
+        manager!.scanForPeripherals(withServices: [heartRateServiceUUID], options: nil)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : AnyObject], rssi RSSI: NSNumber) {
+        guard running else {
+            return
+        }
+        // TODO: log peripheral name
+        // TODO: connecting to first found peripheral here may not be the best policy.
+        // one way to handle is let the user make feedback about "wrong peripheral", then either ban or soft-ban that peripheral.
+        delegate!.connectionUpdate("Discovered \(peripheral.name)")
+        manager!.connect(peripheral, options: [CBConnectPeripheralOptionNotifyOnDisconnectionKey: NSNumber(value: true)])
+        manager!.stopScan()
+    }
+    
+    /**
+      Invoked when a connection is successfully created with a peripheral
+     */
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        guard running else {
+            return
+        }
+        delegate!.connectionUpdate("Connected \(peripheral.name)")
+        connectedPeripheral = peripheral
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }
     
+    /**
+     Invoked whenever an existing connection with the peripheral is torn down.
+    */
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+        // TODO: start scanning again, periodically
+        delegate!.heartRateServiceDidDisconnect()
+    }
+    
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
-        guard error == nil else {
+        guard running && error == nil else {
             // TODO log, cleanup?
             return
         }
+        delegate!.connectionUpdate("Discovered services for \(peripheral.name)")
         let services = peripheral.services;
         for service in services! {
             if service.uuid.isEqual(heartRateServiceUUID) {
@@ -79,6 +130,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         for characteristic in service.characteristics! {
             if characteristic.uuid.isEqual(heartRateMeasurementUUID) {
                 peripheral.setNotifyValue(true, for: characteristic)
+                delegate!.heartRateServiceDidConnect(name: peripheral.name == nil ? "(unknown)" : peripheral.name!)
             }
         }
     }
@@ -92,7 +144,30 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
             return
         }
         let data = characteristic.value!;
-        var buffer = [UInt8](repeating: 0x00, count: data.count)
-        
+        let bytes = UnsafeMutablePointer<UInt8>(allocatingCapacity: data.count)
+        data.copyBytes(to: bytes, count: data.count)
+        let flags = HeartRateFlags(flag: bytes[0])
+        var hr: UInt16
+        let sensorContact = flags.sensorContact
+        var energy: UInt16?
+        var rrInterval: UInt16?
+        if flags.hrSize == 1 {
+            hr = UInt16(bytes[1])
+        } else {
+            hr = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + 1)[0])
+        }
+        var curOffset = 1 + flags.hrSize
+        if flags.energyExpended {
+            energy = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + curOffset)[0])
+            curOffset += 2
+        }
+        if flags.rrInterval {
+            rrInterval = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + curOffset)[0])
+            rrInterval = UInt16(Double(rrInterval!) / 1024.0 * 1000.0)
+        }
+        let dataPoint = HeartRateDataPoint(
+            hr: hr, sensorContact: sensorContact,
+            energy: energy, rrInterval: rrInterval)
+        delegate!.heartRateDataArrived(data: dataPoint)
     }
 }
