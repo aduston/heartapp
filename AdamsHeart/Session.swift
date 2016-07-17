@@ -35,11 +35,12 @@ class Session: HeartRateDelegate {
     
     init() {
         #if (arch(i386) || arch(x86_64))
-            let numSecondsRun = 110
-            _data = HeartRateData(withStartTime: NSDate.timeIntervalSinceReferenceDate() - Double(numSecondsRun))
-            for i in 0..<numSecondsRun {
-                _data.addObservation(heartRate: UInt8(80 + (i % 40)), elapsedSeconds: i)
-            }
+            // let numSecondsRun = 110
+            // _data = HeartRateData(withStartTime: NSDate.timeIntervalSinceReferenceDate() - Double(numSecondsRun))
+            // for i in 0..<numSecondsRun {
+            //     _data.addObservation(heartRate: UInt8(80 + (i % 40)), elapsedSeconds: i)
+            // }
+            _data = HeartRateData()
             _monitor = DevHeartRateMonitor(delegate: self)
         #else
             _data = HeartRateData()

@@ -63,6 +63,11 @@ public class ChartDrawer {
     
     public func draw(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) {
         let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(ceil(numObs)))
+        guard actualMaxHR != 0 else {
+            context.setFillColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            context.fill(rect)
+            return
+        }
         let maxHR = actualMaxHR + (5 - (actualMaxHR % 5))
         let minHR = actualMinHR - (actualMinHR % 5) - 5
         let params = ChartParams.create(

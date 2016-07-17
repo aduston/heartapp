@@ -53,7 +53,10 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
     
     func stop() {
         running = false
-        // TODO
+        // TODO!
+        if connectedPeripheral != nil {
+            
+        }
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -78,7 +81,8 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         // TODO: log peripheral name
         // TODO: connecting to first found peripheral here may not be the best policy.
         // one way to handle is let the user make feedback about "wrong peripheral", then either ban or soft-ban that peripheral.
-        delegate!.connectionUpdate("Discovered \(peripheral.name)")
+        delegate!.connectionUpdate("Discovered \(peripheral.name!)")
+        connectedPeripheral = peripheral
         manager!.connect(peripheral, options: [CBConnectPeripheralOptionNotifyOnDisconnectionKey: NSNumber(value: true)])
         manager!.stopScan()
     }
@@ -90,8 +94,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         guard running else {
             return
         }
-        delegate!.connectionUpdate("Connected \(peripheral.name)")
-        connectedPeripheral = peripheral
+        delegate!.connectionUpdate("Connected \(peripheral.name!)")
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }
@@ -101,7 +104,9 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
     */
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
         // TODO: start scanning again, periodically
-        delegate!.heartRateServiceDidDisconnect()
+        if delegate != nil {
+            delegate!.heartRateServiceDidDisconnect()
+        }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
@@ -109,7 +114,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
             // TODO log, cleanup?
             return
         }
-        delegate!.connectionUpdate("Discovered services for \(peripheral.name)")
+        delegate!.connectionUpdate("Discovered services for \(peripheral.name!)")
         let services = peripheral.services;
         for service in services! {
             if service.uuid.isEqual(heartRateServiceUUID) {

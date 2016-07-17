@@ -55,7 +55,9 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     }
     
     private func newObservation() {
-        self.startObs += 1.0
+        if data.curObservation + 1 > Int(numObs) {
+            self.startObs += 1.0
+        }
         self.setNeedsDisplay()
     }
 

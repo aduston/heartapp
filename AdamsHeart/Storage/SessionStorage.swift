@@ -19,7 +19,7 @@ class SessionStorage {
     private var baseDirectory: URL
     
     convenience init() {
-        let fm = FileManager.default()
+        let fm = FileManager.default
         self.init(baseDirectory: fm.urlsForDirectory(.documentDirectory, inDomains: .userDomainMask)[0])
     }
     
@@ -79,7 +79,7 @@ class SessionStorage {
     
     private func ensureDataDir() {
         let dataDir = URL(fileURLWithPath: "data", relativeTo: baseDirectory)
-        let fm = FileManager.default()
+        let fm = FileManager.default
         if !fm.fileExists(atPath: dataDir.path!) {
             do {
                 try fm.createDirectory(at: dataDir, withIntermediateDirectories: true, attributes: nil)
@@ -91,7 +91,7 @@ class SessionStorage {
     
     private func writeObservations(timestamp: UInt32, observations: [Observation]) {
         let fileURL = observationsFileURL(timestamp: timestamp)
-        let fm = FileManager.default()
+        let fm = FileManager.default
         // TODO: could return false
         fm.createFile(atPath: fileURL.path!, contents: HeartRateData.observationsToData(observations: observations), attributes: nil)
     }
