@@ -55,7 +55,7 @@ class RecordViewController: UIViewController, HeartRateDelegate {
     }
     
     func heartRateDataArrived(data: HeartRateDataPoint) {
-        hrLabel?.text = String(data.hr)
+        hrLabel?.text = "\(data.calculatedHR)"
     }
     
     @IBAction func doneClicked(sender: UIButton) {

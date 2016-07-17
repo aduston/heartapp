@@ -26,11 +26,12 @@ class DevHeartRateMonitor: HeartRateMonitor {
         if fireNo == 0 {
             self.delegate.heartRateServiceDidConnect(name: "polar strap")
         } else {
+            let hr = 80 + (fireNo * 3) % 80
             self.delegate.heartRateDataArrived(data: HeartRateDataPoint(
-                hr: 80 + (fireNo * 3) % 80,
+                hr: hr,
                 sensorContact: 0,
                 energy: 0,
-                rrInterval: 89
+                rrInterval: 60000 / hr
             ))
         }
         fireNo += 1

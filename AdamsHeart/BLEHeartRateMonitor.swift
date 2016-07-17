@@ -129,7 +129,6 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
             return
         }
         guard service.uuid.isEqual(heartRateServiceUUID) else {
-            // TODO: log, cleanup?
             return
         }
         for characteristic in service.characteristics! {

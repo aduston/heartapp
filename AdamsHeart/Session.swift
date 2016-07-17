@@ -66,7 +66,7 @@ class Session: HeartRateDelegate {
         if _sessionStart == nil {
             _sessionStart = UInt32(Date().timeIntervalSinceReferenceDate)
         }
-        _data.addObservation(heartRate: UInt8(data.hr))
+        _data.addObservation(heartRate: UInt8(data.calculatedHR))
         if _delegate != nil {
             _delegate!.heartRateDataArrived(data: data)
         }
