@@ -86,7 +86,10 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
             startObs = Double(data.curObservation) - numObs + 1.0
         } else {
             let curLeftX = min(sender.location(ofTouch: 0, in: self).x, sender.location(ofTouch: 1, in: self).x)
-            
+            let distance = (curLeftX - pinchStartLeftX!) / self.frame.width
+            startObs = pinchStartStartObs! + (pinchStartNumObs! - numObs) / 2
+            startObs -= numObs * Double(distance)
+            startObs = min(max(0, startObs), Double(data.curObservation + 1) - numObs)
         }
         self.setNeedsDisplay()
     }
