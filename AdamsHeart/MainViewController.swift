@@ -11,7 +11,9 @@ import CoreData
 
 class MainViewController: UIViewController, UITableViewDelegate {
     @IBOutlet weak var sessionTable: UITableView?
-    var sessionTableDataSource: SessionTableDataSource?
+    private var sessionTableDataSource: SessionTableDataSource?
+    private var selectedSession: SessionMetadataMO? // when a table cell is clicked
+    private var selectedHeartData: HeartRateData? // when a table cell is clicked
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,6 +48,30 @@ class MainViewController: UIViewController, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return SessionTableCell.cellHeight
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard sessionTableDataSource != nil else {
+            return
+        }
+        selectedSession = sessionTableDataSource!.sessionMetadata(at: indexPath)
+        // TODO: show loading
+        DispatchQueue.global(attributes: .qosUserInteractive).async {
+            let observations = SessionStorage.instance.sessionObservations(
+                timestamp: self.selectedSession!.timestampValue)
+            DispatchQueue.main.async {
+                self.selectedHeartData = HeartRateData(observations: observations!)
+                self.performSegue(withIdentifier: "sessionDetail", sender: self)
+            }
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "sessionDetail" {
+            let destination = segue.destinationViewController as! SessionDetailViewController
+            destination.sessionMetadata = selectedSession
+            destination.heartData = selectedHeartData
+        }
     }
 }
 

@@ -144,13 +144,14 @@ public class HeartRateData {
     public static func dataToObservations(data: Data) -> [Observation] {
         var bytes: [UInt8] = [UInt8](repeating: 0, count: data.count)
         data.copyBytes(to: &bytes, count: data.count)
-        var observations = [UInt32](repeating: 0, count: data.count / 4)
-        for i in 0..<bytes.count {
-            let offset = i / 4
+        let numObs = data.count / 4
+        var observations = [UInt32](repeating: 0, count: numObs)
+        for i in 0..<numObs {
+            let offset = i * 4
             observations[i] =
-                (UInt32(bytes[offset]) << 24) &
-                (UInt32(bytes[offset + 1]) << 16) &
-                (UInt32(bytes[offset + 2]) << 8) &
+                (UInt32(bytes[offset]) << 24) |
+                (UInt32(bytes[offset + 1]) << 16) |
+                (UInt32(bytes[offset + 2]) << 8) |
                 UInt32(bytes[offset + 3])
         }
         return observations

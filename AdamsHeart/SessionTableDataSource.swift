@@ -37,8 +37,7 @@ class SessionTableDataSource: NSObject, UITableViewDataSource, NSFetchedResultsC
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SessionTableDataSource.cellId, for: indexPath) as! SessionTableCell
-        let sessionMetadata = fetchedResultsController.object(at: indexPath)
-        cell.setRecord(record: sessionMetadata)
+        cell.setRecord(record: sessionMetadata(at: indexPath))
         return cell
     }
     
@@ -46,6 +45,10 @@ class SessionTableDataSource: NSObject, UITableViewDataSource, NSFetchedResultsC
         if tableView != nil {
             tableView!.beginUpdates()
         }
+    }
+    
+    func sessionMetadata(at indexPath: IndexPath) -> SessionMetadataMO {
+        return fetchedResultsController.object(at: indexPath)
     }
     
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {

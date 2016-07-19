@@ -20,7 +20,9 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     private var numObs: Double
     private var chartDrawer: ChartDrawer
     private let pinchRec = UIPinchGestureRecognizer()
+    private var pinchStartStartObs: Double?
     private var pinchStartNumObs: Double?
+    private var pinchStartLeftX: CGFloat?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -68,17 +70,23 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         let state = sender.state
         let scale = sender.scale
         if state == .began {
+            pinchStartStartObs = startObs
             pinchStartNumObs = numObs
+            pinchStartLeftX = min(sender.location(ofTouch: 0, in: self).x, sender.location(ofTouch: 1, in: self).x)
         } else if state == .ended {
+            pinchStartStartObs = nil
             pinchStartNumObs = nil
+            pinchStartLeftX = nil
         }
         if pinchStartNumObs == nil {
             return
         }
-        // let velocity = sender.velocity
         numObs = min(Double(data.curObservation + 1), max(0.0, pinchStartNumObs! * Double(1.0 / scale)))
         if type == .record {
             startObs = Double(data.curObservation) - numObs + 1.0
+        } else {
+            let curLeftX = min(sender.location(ofTouch: 0, in: self).x, sender.location(ofTouch: 1, in: self).x)
+            
         }
         self.setNeedsDisplay()
     }

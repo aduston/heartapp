@@ -37,11 +37,40 @@
                     </view>
                     <connections>
                         <outlet property="sessionTable" destination="Yuq-RZ-jmZ" id="mQZ-Ww-BEN"/>
+                        <segue destination="I8s-DJ-auf" kind="presentation" identifier="sessionDetail" modalTransitionStyle="crossDissolve" id="rtV-lx-XAG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="32.799999999999997" y="38.23088455772114"/>
+        </scene>
+        <!--Session Detail View Controller-->
+        <scene sceneID="wIX-p4-adv">
+            <objects>
+                <viewController id="I8s-DJ-auf" customClass="SessionDetailViewController" customModule="AdamsHeart" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="FTa-JR-4IY"/>
+                        <viewControllerLayoutGuide type="bottom" id="ssE-wp-AEe"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="TFt-fK-YG8">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UnD-5p-ngq">
+                                <frame key="frameInset" minX="304" minY="36" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Close"/>
+                                <connections>
+                                    <action selector="closeClickedWithSender:" destination="I8s-DJ-auf" eventType="touchUpInside" id="MmO-fz-5QM"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jYH-YE-TPG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="130" y="790"/>
         </scene>
         <!--Record View Controller-->
         <scene sceneID="0KN-aJ-AM8">
