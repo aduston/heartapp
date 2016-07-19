@@ -22,7 +22,7 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     private let pinchRec = UIPinchGestureRecognizer()
     private var pinchStartStartObs: Double?
     private var pinchStartNumObs: Double?
-    private var pinchStartLeftX: CGFloat?
+    private var pinchStartCenterX: CGFloat?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -72,11 +72,11 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         if state == .began {
             pinchStartStartObs = startObs
             pinchStartNumObs = numObs
-            pinchStartLeftX = min(sender.location(ofTouch: 0, in: self).x, sender.location(ofTouch: 1, in: self).x)
+            pinchStartCenterX = (sender.location(ofTouch: 0, in: self).x + sender.location(ofTouch: 1, in: self).x) / 2.0
         } else if state == .ended {
             pinchStartStartObs = nil
             pinchStartNumObs = nil
-            pinchStartLeftX = nil
+            pinchStartCenterX = nil
         }
         if pinchStartNumObs == nil {
             return
@@ -85,9 +85,9 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         if type == .record {
             startObs = Double(data.curObservation) - numObs + 1.0
         } else {
-            let curLeftX = min(sender.location(ofTouch: 0, in: self).x, sender.location(ofTouch: 1, in: self).x)
-            let distance = (curLeftX - pinchStartLeftX!) / self.frame.width
-            startObs = pinchStartStartObs! + (pinchStartNumObs! - numObs) / 2
+            let curCenterX = (sender.location(ofTouch: 0, in: self).x + sender.location(ofTouch: 1, in: self).x) / 2.0
+            let distance = (curCenterX - pinchStartCenterX!) / self.frame.width
+            startObs = pinchStartStartObs! + (pinchStartNumObs! - numObs) / 2.0
             startObs -= numObs * Double(distance)
             startObs = min(max(0, startObs), Double(data.curObservation + 1) - numObs)
         }
