@@ -14,6 +14,7 @@
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
 		574E44811D3581FB000D69BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44801D3581FB000D69BC /* Session.swift */; };
 		574E44881D3694C1000D69BC /* SessionStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44871D3694C1000D69BC /* SessionStorage.swift */; };
+		578352001D4578E3003635E6 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 578351FF1D4578E3003635E6 /* TouchState.swift */; };
 		57D7997C1D2ABE3F008F7C58 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */; };
 		57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */; };
 		57D799811D2ABE3F008F7C58 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D7997F1D2ABE3F008F7C58 /* Main.storyboard */; };
@@ -53,6 +54,7 @@
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
 		574E44801D3581FB000D69BC /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		574E44871D3694C1000D69BC /* SessionStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionStorage.swift; path = Storage/SessionStorage.swift; sourceTree = "<group>"; };
+		578351FF1D4578E3003635E6 /* TouchState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
 		57D799781D2ABE3F008F7C58 /* AdamsHeart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AdamsHeart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D7997B1D2ABE3F008F7C58 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		57D7997D1D2ABE3F008F7C58 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 				574524E71D313D8E00947F94 /* ChartDrawer.swift */,
 				574E44801D3581FB000D69BC /* Session.swift */,
 				5741F0A51D3E03B20037BB48 /* SessionDetailViewController.swift */,
+				578351FF1D4578E3003635E6 /* TouchState.swift */,
 			);
 			path = AdamsHeart;
 			sourceTree = "<group>";
@@ -290,6 +293,7 @@
 				57D799981D2AD768008F7C58 /* BLEHeartRateMonitor.swift in Sources */,
 				57EFFC741D37C781008FB3BF /* DataModel.xcdatamodeld in Sources */,
 				57436BEF1D39847E00AB8BFD /* SessionTableCell.swift in Sources */,
+				578352001D4578E3003635E6 /* TouchState.swift in Sources */,
 				574E44881D3694C1000D69BC /* SessionStorage.swift in Sources */,
 				57436BED1D39391D00AB8BFD /* SessionTableDataSource.swift in Sources */,
 				5741F0A61D3E03B20037BB48 /* SessionDetailViewController.swift in Sources */,

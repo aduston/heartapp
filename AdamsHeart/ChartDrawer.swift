@@ -38,15 +38,19 @@ struct ChartParams {
     let barWidth: CGFloat
     
     static func create(context: CGContext, rect: CGRect, startObs: Double, numObs: Double, minRate: UInt8, maxRate: UInt8) -> ChartParams {
-        let graphRect = CGRect(
-            x: rect.minX + ChartParams.spaceLeft,
-            y: rect.minY + ChartParams.spaceBottom,
-            width: rect.width - ChartParams.spaceLeft,
-            height: rect.height - ChartParams.spaceBottom * 2)
+        let graphRect = ChartParams.graphRect(viewRect: rect)
         let beatHeight = maxRate == minRate ? 0 : graphRect.size.height / CGFloat(maxRate - minRate)
         let spread = maxRate - minRate
         let barWidth = graphRect.width / CGFloat(numObs)
         return ChartParams(context: context, rect: rect, startObs: startObs, numObs: numObs, minRate: minRate, maxRate: maxRate, graphRect: graphRect, beatHeight: beatHeight, spread: spread, barWidth: barWidth)
+    }
+    
+    static func graphRect(viewRect: CGRect) -> CGRect {
+        return CGRect(
+            x: viewRect.minX + ChartParams.spaceLeft,
+            y: viewRect.minY + ChartParams.spaceBottom,
+            width: viewRect.width - ChartParams.spaceLeft,
+            height: viewRect.height - ChartParams.spaceBottom * 2)
     }
     
     func yForHR(_ hr: UInt8) -> CGFloat {
@@ -62,7 +66,7 @@ public class ChartDrawer {
     }
     
     public func draw(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) {
-        let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(ceil(numObs)))
+        let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(ceil(numObs)) + 1)
         guard actualMaxHR != 0 else {
             context.setFillColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
             context.fill(rect)

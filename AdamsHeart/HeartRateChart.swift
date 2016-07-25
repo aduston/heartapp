@@ -19,10 +19,8 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
     private var startObs: Double
     private var numObs: Double
     private var chartDrawer: ChartDrawer
-    private let pinchRec = UIPinchGestureRecognizer()
-    private var pinchStartStartObs: Double?
-    private var pinchStartNumObs: Double?
-    private var pinchStartCenterX: CGFloat?
+    private var chartRect: CGRect
+    private var touchState: TouchState?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -38,10 +36,9 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         self.startObs = startObs
         self.numObs = numObs
         self.chartDrawer = ChartDrawer(data: data)
+        self.chartRect = ChartParams.graphRect(viewRect: frame);
         super.init(frame: frame)
         self.isMultipleTouchEnabled = true
-        self.pinchRec.addTarget(self, action: #selector(pinchedView))
-        self.addGestureRecognizer(self.pinchRec)
     }
     
     override func willMove(toSuperview newSuperview: UIView?) {
@@ -62,38 +59,40 @@ class HeartRateChart: UIView, UIGestureRecognizerDelegate {
         }
         self.setNeedsDisplay()
     }
-
-    @objc private func pinchedView(sender: UIPinchGestureRecognizer) {
-        if sender.numberOfTouches() != 2 {
-            return
-        }
-        let state = sender.state
-        let scale = sender.scale
-        if state == .began {
-            pinchStartStartObs = startObs
-            pinchStartNumObs = numObs
-            pinchStartCenterX = (sender.location(ofTouch: 0, in: self).x + sender.location(ofTouch: 1, in: self).x) / 2.0
-        } else if state == .ended {
-            pinchStartStartObs = nil
-            pinchStartNumObs = nil
-            pinchStartCenterX = nil
-        }
-        if pinchStartNumObs == nil {
-            return
-        }
-        numObs = min(Double(data.curObservation + 1), max(0.0, pinchStartNumObs! * Double(1.0 / scale)))
-        if type == .record {
-            startObs = Double(data.curObservation) - numObs + 1.0
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if touchState == nil {
+            touchState = TouchState.newState(touches: touches, startObs: startObs, numObs: numObs, view: self, chartRect: chartRect)
         } else {
-            let curCenterX = (sender.location(ofTouch: 0, in: self).x + sender.location(ofTouch: 1, in: self).x) / 2.0
-            let distance = (curCenterX - pinchStartCenterX!) / self.frame.width
-            startObs = pinchStartStartObs! + (pinchStartNumObs! - numObs) / 2.0
-            startObs -= numObs * Double(distance)
-            startObs = min(max(0, startObs), Double(data.curObservation + 1) - numObs)
+            touchState = touchState!.newState(afterAdding: touches)
         }
-        self.setNeedsDisplay()
     }
-
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if touchState != nil {
+            let (newStartObs, newNumObs) = touchState!.curStartAndNumObs()
+            numObs = min(Double(data.curObservation + 1), max(0.0, newNumObs))
+            if type == .record {
+                startObs = Double(data.curObservation) - numObs + 1
+            } else {
+                startObs = min(Double(data.curObservation + 1) - numObs, max(0.0, newStartObs))
+            }
+            self.setNeedsDisplay()
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if touchState == nil {
+            touchState = TouchState.newState(touches: touches, startObs: startObs, numObs: numObs, view: self, chartRect: chartRect)
+        } else {
+            touchState = touchState?.newState(afterRemoving: touches)
+        }
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // TODO: what?
+    }
+    
     override func draw(_ rect: CGRect) {
         super.draw(rect)
         chartDrawer.draw(context: UIGraphicsGetCurrentContext()!, rect: rect, startObs: startObs, numObs: numObs)
