@@ -108,14 +108,22 @@ public class HeartRateData {
         return (minHR, maxHR)
     }
     
-    public func summary(startObs: Double, endObs: Double) -> (minHR: UInt8, maxHR: UInt8, hasHalved: Bool) {
+    public func summary(startObs: Double, endObs: Double) -> (minSeconds: UInt32, maxSeconds: UInt32, minHR: UInt8, maxHR: UInt8, hasHalved: Bool) {
         let minIndex = max(Int(startObs), 0)
         let maxIndex = min(Int(ceil(endObs)), curObservation)
         var minHR: UInt8 = 200
         var maxHR: UInt8 = 0
         var hasHalved = false
+        var minSeconds: UInt32 = UInt32.max
+        var maxSeconds: UInt32 = UInt32.min
         for i in minIndex...maxIndex {
-            let (_, halved, hr) = HeartRateData.components(observation: observations[i])
+            let (seconds, halved, hr) = HeartRateData.components(observation: observations[i])
+            if seconds < minSeconds {
+                minSeconds = seconds
+            }
+            if seconds > maxSeconds {
+                maxSeconds = seconds
+            }
             if halved {
                 hasHalved = true
             }
@@ -126,7 +134,7 @@ public class HeartRateData {
                 maxHR = hr
             }
         }
-        return (minHR, maxHR, hasHalved)
+        return (minSeconds, maxSeconds, minHR, maxHR, hasHalved)
     }
     
     public static func observationsToData(observations: [Observation]) -> Data {

@@ -18,10 +18,11 @@ import CoreGraphics
 #endif
 
 struct ChartParams {
+    static let xLabelWidth: CGFloat = 60
     static let minRate: UInt8 = 35
     static let maxRate: UInt8 = 175
     static let spaceLeft: CGFloat = 30
-    static let spaceBottom: CGFloat = 20
+    static let spaceBottom: CGFloat = 25
     static let labelFont = NSUIFont(name: "Helvetica", size: 14)!
     static let regularBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 0.7, 1.0])!
     static let halvedBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.7, 0.0, 0.0, 1.0])!
@@ -73,7 +74,6 @@ public class ChartDrawer {
         drawHorizontalLines(params)
         if data.curObservation > -1 {
             drawValues(params)
-            drawTimes(params)
         }
     }
     
@@ -119,6 +119,7 @@ public class ChartDrawer {
         if params.numObs <= Double(maxNumBars) {
             drawWideValues(params)
         } else {
+            let labeledMultiple = UInt32(findLabeledMultiple(params))
             let obsPerBar = params.numObs / Double(maxNumBars)
             let pixelsPerObs = Double(params.graphRect.width) / params.numObs
             let pixelsPerBar = Double(params.graphRect.width) / Double(maxNumBars)
@@ -127,31 +128,47 @@ public class ChartDrawer {
             // the zeroth bar index starts at observation 0 at obsStartX
             var barIndex = Int(params.startObs / obsPerBar)
             var x = obsStartX + Double(barIndex) * pixelsPerBar
+            var lastLabelX: CGFloat = 0
             while x < Double(params.graphRect.maxX) {
                 if x + pixelsPerBar < Double(params.graphRect.minX) {
                     // too far to the left
                     continue
                 }
-                let (minHR, maxHR, hasHalved) = data.summary(
+                let (minSeconds, maxSeconds, minHR, maxHR, hasHalved) = data.summary(
                     startObs: Double(barIndex) * obsPerBar,
                     endObs: Double(barIndex + 1) * obsPerBar)
                 let maxY = params.yForHR(maxHR)
                 let minY = params.yForHR(minHR)
                 let valueStrokeColor = hasHalved ? ChartParams.halvedBeatStroke : ChartParams.regularBeatStroke
                 let valueFillColor = hasHalved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill
-                drawGraphValueLine(
+                let lineX = drawGraphValueLine(
                     params, x: CGFloat(x), y0: minY, y1: maxY,
                     width: CGFloat(pixelsPerBar), color: valueStrokeColor)
-                drawGraphValueLine(
+                _ = drawGraphValueLine(
                     params, x: CGFloat(x), y0: params.graphRect.maxY, y1: maxY,
                     width: CGFloat(pixelsPerBar), color: valueFillColor)
+                if lastLabelX == 0 || lastLabelX < CGFloat(x) - ChartParams.xLabelWidth / 2.0 {
+                    let newLabelX = maybeDrawXLabel(params, minSeconds: minSeconds, maxSeconds: maxSeconds, labeledMultiple: labeledMultiple, lineX: lineX)
+                    if newLabelX != 0.0 {
+                        lastLabelX = newLabelX
+                    }
+                }
                 barIndex += 1
                 x = obsStartX + Double(barIndex) * pixelsPerBar
             }
         }
     }
     
-    private func drawGraphValueLine(_ params: ChartParams, x: CGFloat, y0: CGFloat, y1: CGFloat, width: CGFloat, color: CGColor) {
+    private func maybeDrawXLabel(_ params: ChartParams, minSeconds: UInt32, maxSeconds: UInt32, labeledMultiple: UInt32, lineX: CGFloat) -> CGFloat {
+        for seconds in minSeconds...maxSeconds {
+            if seconds % labeledMultiple == 0 {
+                return drawXLabel(params, midX: lineX, seconds: seconds)
+            }
+        }
+        return 0.0
+    }
+    
+    private func drawGraphValueLine(_ params: ChartParams, x: CGFloat, y0: CGFloat, y1: CGFloat, width: CGFloat, color: CGColor) -> CGFloat {
         let c = params.context
         let lineMinX = max(x, params.graphRect.minX)
         let actualWidth = min(width, x + width - params.graphRect.minX, params.graphRect.maxX - x)
@@ -162,9 +179,11 @@ public class ChartDrawer {
         c.moveTo(x: lineX, y: y0)
         c.addLineTo(x: lineX, y: y1)
         c.strokePath()
+        return lineX
     }
     
     private func drawWideValues(_ params: ChartParams) {
+        let labeledMultiple = UInt32(findLabeledMultiple(params))
         let c = params.context
         c.setFillColor(ChartParams.regularBeatFill)
         var inHasHalved = false
@@ -174,8 +193,9 @@ public class ChartDrawer {
         if Double(startObs) < params.startObs {
             curX -= params.barWidth * CGFloat(params.startObs - Double(startObs))
         }
+        var lastLabelX: CGFloat = 0
         for obsIndex in startObs...endObs {
-            let (_, halved, hr) = HeartRateData.components(observation: data.observations[obsIndex])
+            let (seconds, halved, hr) = HeartRateData.components(observation: data.observations[obsIndex])
             if halved != inHasHalved {
                 c.setFillColor(halved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill)
                 inHasHalved = halved
@@ -187,11 +207,60 @@ public class ChartDrawer {
                           y: y,
                           width: nextX - x,
                           height: params.graphRect.maxY - y))
+            let midX = (x + nextX) / 2.0
+            if seconds % labeledMultiple == 0 && lastLabelX < midX - ChartParams.xLabelWidth / 2.0 {
+                lastLabelX = drawXLabel(params, midX: midX, seconds: seconds)
+                // without this fill color gets reset
+                c.setFillColor(inHasHalved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill)
+            }
             curX = nextX
         }
     }
     
-    private func drawTimes(_ params: ChartParams) {
-        // TODO: write me
+    private func findLabeledMultiple(_ params: ChartParams) -> Int {
+        let maxNumLabels = Double(params.graphRect.width / ChartParams.xLabelWidth)
+        let obsPerLabel = Int(params.numObs / maxNumLabels)
+        let intervals: [Int] = [5, 15, 30, 60, 300, 600, 900, 1800, 3600, 7200];
+        for i in 0..<intervals.count {
+            if obsPerLabel < intervals[i] {
+                return intervals[i]
+            }
+        }
+        return 18000
+    }
+    
+    private func drawXLabel(_ params: ChartParams, midX: CGFloat, seconds: UInt32) -> CGFloat {
+        if midX >= params.graphRect.minX && midX < params.graphRect.maxX {
+            let c = params.context
+            c.beginPath()
+            c.setStrokeColor(CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 0.0, 1.0])!)
+            c.setLineWidth(1.0)
+            c.moveTo(x: midX, y: params.graphRect.maxY)
+            c.addLineTo(x: midX, y: params.graphRect.maxY + 5)
+            c.strokePath()
+        } else {
+            return 0.0
+        }
+        let label = timeLabelText(seconds) as NSString
+        #if os(iOS)
+            let labelSize = label.size(attributes: [NSFontAttributeName: ChartParams.labelFont])
+        #elseif os(OSX)
+            let labelSize = label.size(withAttributes: [NSFontAttributeName: params.labelFont])
+        #endif
+        
+        let point = CGPoint(x: midX - labelSize.width / 2.0,
+                            y: params.graphRect.maxY + 7)
+        label.draw(at: point, withAttributes: [NSFontAttributeName: ChartParams.labelFont])
+        return midX + labelSize.width / 2.0
+    }
+    
+    private func timeLabelText(_ seconds: UInt32) -> String {
+        if seconds < 60 {
+            return String(format: "0:%02d", seconds)
+        } else if seconds < 3600 {
+            return String(format: "%d:%02d", seconds / 60, seconds % 60)
+        } else {
+            return String(format: "%d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
+        }
     }
 }
