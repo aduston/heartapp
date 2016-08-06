@@ -26,6 +26,24 @@ class SessionStorage {
         self.baseDirectory = baseDirectory
     }
     
+    func rewriteImages() {
+        // when image drawing is changed it can be useful to re-generate all stored images
+        let fetchRequest = SessionMetadataMO.fetchRequest()
+        do {
+            let moc = coreDataController.managedObjectContext
+            let fetchedMetadata = try moc.fetch(fetchRequest) as! [SessionMetadataMO]
+            for i in 0..<fetchedMetadata.count {
+                let sessionMetadata = fetchedMetadata[i]
+                let observations = sessionObservations(timestamp: sessionMetadata.timestampValue)
+                if observations != nil {
+                    writeImage(timestamp: sessionMetadata.timestampValue, observations: observations!)
+                }
+            }
+        } catch {
+            fatalError("error fetching: \(error)")
+        }
+    }
+    
     func saveSession(timestamp: UInt32, observations: [Observation]) -> Bool {
         ensureDataDir()
         writeObservations(timestamp: timestamp, observations: observations)

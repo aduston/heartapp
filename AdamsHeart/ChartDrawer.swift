@@ -21,6 +21,7 @@ struct ChartParams {
     static let xLabelWidth: CGFloat = 60
     static let minRate: UInt8 = 35
     static let maxRate: UInt8 = 175
+    static let spaceTop: CGFloat = 5
     static let spaceLeft: CGFloat = 30
     static let spaceBottom: CGFloat = 25
     static let labelFont = NSUIFont(name: "Helvetica", size: 14)!
@@ -48,9 +49,9 @@ struct ChartParams {
     static func graphRect(viewRect: CGRect) -> CGRect {
         return CGRect(
             x: viewRect.minX + ChartParams.spaceLeft,
-            y: viewRect.minY + ChartParams.spaceBottom,
+            y: viewRect.minY + spaceTop,
             width: viewRect.width - ChartParams.spaceLeft,
-            height: viewRect.height - ChartParams.spaceBottom * 2)
+            height: viewRect.height - ChartParams.spaceBottom - spaceTop)
     }
     
     func yForHR(_ hr: UInt8) -> CGFloat {

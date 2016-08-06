@@ -11,9 +11,9 @@ import UIKit
 
 
 class SessionTableCell: UITableViewCell {
-    static let padding: CGFloat = 5
-    static let labelHeight: CGFloat = 25
-    static var imageSize = CGSize(width: UIScreen.main.bounds.width - padding * 2, height: CGFloat(160))
+    static let padding: CGFloat = 8
+    static let labelHeight: CGFloat = 15
+    static var imageSize = CGSize(width: UIScreen.main.bounds.width - padding * 2, height: CGFloat(200))
     static var cellHeight: CGFloat = SessionTableCell.padding * 3 + SessionTableCell.labelHeight + SessionTableCell.imageSize.height
     private var chartImage: UIImageView!
     private var label: UILabel!
