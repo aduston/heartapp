@@ -87,7 +87,7 @@ class RecordViewController: UIViewController, HeartRateDelegate {
             return
         }
         // TODO: show loading screen, disable interaction
-        DispatchQueue.global(attributes: .qosUserInteractive).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             // TODO: use return value
             _ = SessionStorage.instance.saveSession(
                 timestamp: session!.sessionStart!,

@@ -19,8 +19,7 @@ class SessionStorage {
     private var baseDirectory: URL
     
     convenience init() {
-        let fm = FileManager.default
-        self.init(baseDirectory: fm.urlsForDirectory(.documentDirectory, inDomains: .userDomainMask)[0])
+        self.init(baseDirectory: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
     }
     
     init(baseDirectory: URL) {
@@ -33,19 +32,6 @@ class SessionStorage {
         writeImage(timestamp: timestamp, observations: observations)
         writeSessionMetadataRecord(timestamp)
         return true // TODO: account for other possible errors
-    }
-    
-    func listSessions(timestampsLessThan: UInt32, limit: Int) -> [SessionMetadataMO]? {
-        let moc = coreDataController.managedObjectContext
-        let sessionsFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
-        sessionsFetch.predicate = Predicate(format: "timestamp < %@", NSNumber(value: timestampsLessThan))
-        sessionsFetch.sortDescriptors = [SortDescriptor(key: "timestamp", ascending: false)]
-        sessionsFetch.fetchLimit = limit
-        do {
-            return try moc.fetch(sessionsFetch)
-        } catch {
-            return nil
-        }
     }
     
     func chartImageURL(timestamp: UInt32) -> URL {
@@ -80,7 +66,7 @@ class SessionStorage {
     private func ensureDataDir() {
         let dataDir = URL(fileURLWithPath: "data", relativeTo: baseDirectory)
         let fm = FileManager.default
-        if !fm.fileExists(atPath: dataDir.path!) {
+        if !fm.fileExists(atPath: dataDir.path) {
             do {
                 try fm.createDirectory(at: dataDir, withIntermediateDirectories: true, attributes: nil)
             } catch {
@@ -93,7 +79,7 @@ class SessionStorage {
         let fileURL = observationsFileURL(timestamp: timestamp)
         let fm = FileManager.default
         // TODO: could return false
-        fm.createFile(atPath: fileURL.path!, contents: HeartRateData.observationsToData(observations: observations), attributes: nil)
+        fm.createFile(atPath: fileURL.path, contents: HeartRateData.observationsToData(observations: observations), attributes: nil)
     }
     
     private func writeImage(timestamp: UInt32, observations: [Observation]) {

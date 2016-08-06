@@ -13,7 +13,7 @@ import UIKit
 class SessionTableCell: UITableViewCell {
     static let padding: CGFloat = 5
     static let labelHeight: CGFloat = 25
-    static var imageSize = CGSize(width: UIScreen.main().bounds.width - padding * 2, height: CGFloat(160))
+    static var imageSize = CGSize(width: UIScreen.main.bounds.width - padding * 2, height: CGFloat(160))
     static var cellHeight: CGFloat = SessionTableCell.padding * 3 + SessionTableCell.labelHeight + SessionTableCell.imageSize.height
     private var chartImage: UIImageView!
     private var label: UILabel!
@@ -26,7 +26,7 @@ class SessionTableCell: UITableViewCell {
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = UIColor.white()
+        backgroundColor = UIColor.white
         selectionStyle = .none
         
         chartImage = UIImageView(frame: CGRect.zero)
@@ -54,7 +54,7 @@ class SessionTableCell: UITableViewCell {
         let date = Date(timeIntervalSinceReferenceDate: TimeInterval(record.timestampValue))
         label.text = SessionTableCell.dateTimeFormat.string(from: date)
         let ss = SessionStorage.instance
-        chartImage.image = UIImage(contentsOfFile: ss.chartImageURL(timestamp: record.timestampValue).path!)
+        chartImage.image = UIImage(contentsOfFile: ss.chartImageURL(timestamp: record.timestampValue).path)
         setNeedsLayout() // TODO: is this necessary?
     }
 }

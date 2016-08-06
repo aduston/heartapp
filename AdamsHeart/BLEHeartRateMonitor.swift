@@ -102,14 +102,14 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
     /**
      Invoked whenever an existing connection with the peripheral is torn down.
     */
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         // TODO: start scanning again, periodically
         if delegate != nil {
             delegate!.heartRateServiceDidDisconnect()
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard running && error == nil else {
             // TODO log, cleanup?
             return
@@ -123,7 +123,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard error == nil else {
             // TODO: log, cleanup?
             return
@@ -139,7 +139,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil else {
             // TODO: log, cleanup?
             return
@@ -148,7 +148,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
             return
         }
         let data = characteristic.value!;
-        let bytes = UnsafeMutablePointer<UInt8>(allocatingCapacity: data.count)
+        let bytes = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
         data.copyBytes(to: bytes, count: data.count)
         let flags = HeartRateFlags(flag: bytes[0])
         var hr: UInt16
@@ -171,7 +171,7 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         }
         // TODO: is this the right sequence of calls to dealloc?
         bytes.deinitialize()
-        bytes.deallocateCapacity(data.count)
+        bytes.deallocate(capacity: data.count)
         let dataPoint = HeartRateDataPoint(
             hr: hr, sensorContact: sensorContact,
             energy: energy, rrInterval: rrInterval)

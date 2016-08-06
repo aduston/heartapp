@@ -18,7 +18,7 @@ class SessionTableDataSource: NSObject, UITableViewDataSource, NSFetchedResultsC
     init(moc: NSManagedObjectContext) {
         super.init()
         let sessionsFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
-        sessionsFetch.sortDescriptors = [SortDescriptor(key: "timestamp", ascending: false)]
+        sessionsFetch.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: sessionsFetch, managedObjectContext: moc,
             sectionNameKeyPath: nil, cacheName: "rootCache")

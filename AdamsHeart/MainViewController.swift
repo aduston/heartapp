@@ -19,7 +19,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
         super.viewDidLoad()
         if sessionTableDataSource == nil {
             // loading screen should be showing here.
-            DispatchQueue.global(attributes: .qosUserInteractive).async {
+            DispatchQueue.global(qos: .userInteractive).async {
                 // note the following call is potentially long-running.
                 let moc = SessionStorage.instance.coreDataController.managedObjectContext
                 DispatchQueue.main.async {
@@ -56,7 +56,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
         }
         selectedSession = sessionTableDataSource!.sessionMetadata(at: indexPath)
         // TODO: show loading
-        DispatchQueue.global(attributes: .qosUserInteractive).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             let observations = SessionStorage.instance.sessionObservations(
                 timestamp: self.selectedSession!.timestampValue)
             DispatchQueue.main.async {
@@ -68,7 +68,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
     
     override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "sessionDetail" {
-            let destination = segue.destinationViewController as! SessionDetailViewController
+            let destination = segue.destination as! SessionDetailViewController
             destination.sessionMetadata = selectedSession
             destination.heartData = selectedHeartData
         }

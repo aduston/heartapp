@@ -18,6 +18,8 @@ import CoreGraphics
 #endif
 
 struct ChartParams {
+    static let minRate: UInt8 = 35
+    static let maxRate: UInt8 = 175
     static let spaceLeft: CGFloat = 30
     static let spaceBottom: CGFloat = 20
     static let labelFont = NSUIFont(name: "Helvetica", size: 14)!
@@ -30,19 +32,16 @@ struct ChartParams {
     let rect: CGRect
     let startObs: Double
     let numObs: Double
-    let minRate: UInt8
-    let maxRate: UInt8
     let graphRect: CGRect
     let beatHeight: CGFloat
-    let spread: UInt8
     let barWidth: CGFloat
     
-    static func create(context: CGContext, rect: CGRect, startObs: Double, numObs: Double, minRate: UInt8, maxRate: UInt8) -> ChartParams {
+    static func create(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) -> ChartParams {
         let graphRect = ChartParams.graphRect(viewRect: rect)
         let beatHeight = maxRate == minRate ? 0 : graphRect.size.height / CGFloat(maxRate - minRate)
-        let spread = maxRate - minRate
         let barWidth = graphRect.width / CGFloat(numObs)
-        return ChartParams(context: context, rect: rect, startObs: startObs, numObs: numObs, minRate: minRate, maxRate: maxRate, graphRect: graphRect, beatHeight: beatHeight, spread: spread, barWidth: barWidth)
+        return ChartParams(context: context, rect: rect, startObs: startObs, numObs: numObs,
+                           graphRect: graphRect, beatHeight: beatHeight, barWidth: barWidth)
     }
     
     static func graphRect(viewRect: CGRect) -> CGRect {
@@ -54,7 +53,8 @@ struct ChartParams {
     }
     
     func yForHR(_ hr: UInt8) -> CGFloat {
-        return graphRect.maxY - (CGFloat(hr - minRate) * beatHeight)
+        let clampedHR = max(ChartParams.minRate, min(ChartParams.maxRate, hr))
+        return graphRect.maxY - (CGFloat(clampedHR - ChartParams.minRate) * beatHeight)
     }
 }
 
@@ -67,21 +67,14 @@ public class ChartDrawer {
     }
     
     public func draw(context: CGContext, rect: CGRect, startObs: Double, numObs: Double) {
-        let (actualMinHR, actualMaxHR) = data.minAndMax(startObs: Int(startObs), numObs: Int(ceil(numObs)) + 1)
-        guard actualMaxHR != 0 else {
-            context.setFillColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-            context.fill(rect)
-            return
-        }
-        let maxHR = actualMaxHR + (5 - (actualMaxHR % 5))
-        let minHR = actualMinHR - (actualMinHR % 5) - 5
         let params = ChartParams.create(
-            context: context, rect: rect, startObs: startObs,
-            numObs: numObs, minRate: minHR, maxRate: maxHR)
+            context: context, rect: rect, startObs: startObs, numObs: numObs)
         drawBackground(params)
         drawHorizontalLines(params)
-        drawValues(params)
-        drawTimes(params)
+        if data.curObservation > -1 {
+            drawValues(params)
+            drawTimes(params)
+        }
     }
     
     private func drawBackground(_ params: ChartParams) {
@@ -92,18 +85,18 @@ public class ChartDrawer {
     private func drawHorizontalLines(_ params: ChartParams) {
         let c = params.context
         c.setLineWidth(1.0)
-        for hr in params.minRate...params.maxRate {
-            if params.spread > 40 && hr % 5 != 0 {
+        for hr in ChartParams.minRate...ChartParams.maxRate {
+            if hr % 5 != 0 {
                 continue
             }
-            let labeledLine = (params.spread < 60 && hr % 5 == 0) || hr % 10 == 0
+            let labeledLine = hr % 10 == 0
             let y = params.yForHR(hr)
             let strokeDarkness: CGFloat = labeledLine ? 0.0 : 0.7
             c.setStrokeColor(red: strokeDarkness, green: strokeDarkness, blue: strokeDarkness, alpha: 1.0)
             c.moveTo(x: params.graphRect.minX, y: y)
             c.addLineTo(x: params.graphRect.maxX, y: y)
             c.strokePath()
-            if labeledLine && hr > params.minRate {
+            if labeledLine && hr > ChartParams.minRate {
                 addHRLabel(params: params, hr: hr, y: y)
             }
         }
