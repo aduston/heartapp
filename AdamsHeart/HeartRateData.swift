@@ -91,7 +91,7 @@ public class HeartRateData {
     
     public func minAndMax(startObs: Int, numObs: Int) -> (minHR: UInt8, maxHR: UInt8) {
         let startIndex = max(startObs, 0)
-        let endIndex = min(startObs + numObs, curObservation + 1)
+        let endIndex = min(startObs + numObs + 1, curObservation + 1)
         guard endIndex > startIndex else {
             return (0, 0)
         }

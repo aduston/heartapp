@@ -21,10 +21,10 @@ struct ChartParams {
     static let spaceLeft: CGFloat = 30
     static let spaceBottom: CGFloat = 20
     static let labelFont = NSUIFont(name: "Helvetica", size: 14)!
-    static let regularBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 1.0])!
-    static let halvedBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 1.0])!
+    static let regularBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 0.7, 1.0])!
+    static let halvedBeatStroke = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.7, 0.0, 0.0, 1.0])!
     static let regularBeatFill = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 1.0, 0.5])!
-    static let halvedBeatFill = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 0.8])!
+    static let halvedBeatFill = CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[1.0, 0.0, 0.0, 0.5])!
     
     let context: CGContext
     let rect: CGRect
@@ -59,6 +59,7 @@ struct ChartParams {
 }
 
 public class ChartDrawer {
+    static let maxNumBars = 180;
     private var data : HeartRateData
     
     init(data: HeartRateData) {
@@ -97,7 +98,7 @@ public class ChartDrawer {
             }
             let labeledLine = (params.spread < 60 && hr % 5 == 0) || hr % 10 == 0
             let y = params.yForHR(hr)
-            let strokeDarkness: CGFloat = labeledLine ? 0.0 : 0.6
+            let strokeDarkness: CGFloat = labeledLine ? 0.0 : 0.7
             c.setStrokeColor(red: strokeDarkness, green: strokeDarkness, blue: strokeDarkness, alpha: 1.0)
             c.moveTo(x: params.graphRect.minX, y: y)
             c.addLineTo(x: params.graphRect.maxX, y: y)
@@ -121,36 +122,53 @@ public class ChartDrawer {
     }
     
     private func drawValues(_ params: ChartParams) {
-        if (params.barWidth > 1.0) {
+        let maxNumBars = ChartDrawer.maxNumBars
+        if params.numObs <= Double(maxNumBars) {
             drawWideValues(params)
         } else {
-            // TODO: make sure works with runs of constant values
-            let c = params.context
-            c.setLineWidth(1.0)
-            c.setStrokeColor(ChartParams.regularBeatStroke)
-            c.beginPath()
-            var inHasHalved = false
-            let obsPerPoint = params.numObs / Double(params.graphRect.width)
-            for pointNo in 0..<Int(params.graphRect.width) {
+            let obsPerBar = params.numObs / Double(maxNumBars)
+            let pixelsPerObs = Double(params.graphRect.width) / params.numObs
+            let pixelsPerBar = Double(params.graphRect.width) / Double(maxNumBars)
+            // obsStartX is the X position of observation 0.
+            let obsStartX = Double(params.graphRect.minX) - params.startObs * pixelsPerObs
+            // the zeroth bar index starts at observation 0 at obsStartX
+            var barIndex = Int(params.startObs / obsPerBar)
+            var x = obsStartX + Double(barIndex) * pixelsPerBar
+            while x < Double(params.graphRect.maxX) {
+                if x + pixelsPerBar < Double(params.graphRect.minX) {
+                    // too far to the left
+                    continue
+                }
                 let (minHR, maxHR, hasHalved) = data.summary(
-                    startObs: params.startObs + Double(pointNo) * obsPerPoint,
-                    endObs: params.startObs + Double(pointNo + 1) * obsPerPoint)
+                    startObs: Double(barIndex) * obsPerBar,
+                    endObs: Double(barIndex + 1) * obsPerBar)
                 let maxY = params.yForHR(maxHR)
                 let minY = params.yForHR(minHR)
-                let x = params.graphRect.minX + CGFloat(pointNo) + 0.5
-                if hasHalved != inHasHalved {
-                    if pointNo > 0 {
-                        c.strokePath()
-                    }
-                    c.beginPath()
-                    c.setStrokeColor(hasHalved ? ChartParams.halvedBeatStroke : ChartParams.regularBeatStroke)
-                    inHasHalved = hasHalved
-                }
-                c.moveTo(x: x, y: minY)
-                c.addLineTo(x: x, y: maxY)
+                let valueStrokeColor = hasHalved ? ChartParams.halvedBeatStroke : ChartParams.regularBeatStroke
+                let valueFillColor = hasHalved ? ChartParams.halvedBeatFill : ChartParams.regularBeatFill
+                drawGraphValueLine(
+                    params, x: CGFloat(x), y0: minY, y1: maxY,
+                    width: CGFloat(pixelsPerBar), color: valueStrokeColor)
+                drawGraphValueLine(
+                    params, x: CGFloat(x), y0: params.graphRect.maxY, y1: maxY,
+                    width: CGFloat(pixelsPerBar), color: valueFillColor)
+                barIndex += 1
+                x = obsStartX + Double(barIndex) * pixelsPerBar
             }
-            c.strokePath()
         }
+    }
+    
+    private func drawGraphValueLine(_ params: ChartParams, x: CGFloat, y0: CGFloat, y1: CGFloat, width: CGFloat, color: CGColor) {
+        let c = params.context
+        let lineMinX = max(x, params.graphRect.minX)
+        let actualWidth = min(width, x + width - params.graphRect.minX, params.graphRect.maxX - x)
+        let lineX = lineMinX + actualWidth / 2.0
+        c.beginPath()
+        c.setStrokeColor(color)
+        c.setLineWidth(actualWidth)
+        c.moveTo(x: lineX, y: y0)
+        c.addLineTo(x: lineX, y: y1)
+        c.strokePath()
     }
     
     private func drawWideValues(_ params: ChartParams) {
