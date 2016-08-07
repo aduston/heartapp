@@ -44,11 +44,33 @@ class SessionStorage {
         }
     }
     
+    func migrateData() {
+        var fetchedMetadata: [SessionMetadataMO]? = nil
+        let fetchRequest = SessionMetadataMO.fetchRequest()
+        do {
+            let moc = coreDataController.managedObjectContext
+            fetchedMetadata = try moc.fetch(fetchRequest) as? [SessionMetadataMO]
+        } catch {
+            fatalError("error fetching: \(error)")
+        }
+        for i in 0..<fetchedMetadata!.count {
+            let sessionMetadata = fetchedMetadata![i]
+            if sessionMetadata.thresholdStats == nil {
+                let observations = sessionObservations(timestamp: sessionMetadata.timestampValue)
+                let stats = HeartRateData.calculateStats(observations: observations!)
+                if stats != nil {
+                    sessionMetadata.thresholdStats = stats
+                    coreDataController.save()
+                }
+            }
+        }
+    }
+    
     func saveSession(timestamp: UInt32, observations: [Observation]) -> Bool {
         ensureDataDir()
         writeObservations(timestamp: timestamp, observations: observations)
         writeImage(timestamp: timestamp, observations: observations)
-        writeSessionMetadataRecord(timestamp)
+        writeSessionMetadataRecord(timestamp: timestamp, observations: observations)
         return true // TODO: account for other possible errors
     }
     
@@ -119,11 +141,15 @@ class SessionStorage {
         }
     }
     
-    private func writeSessionMetadataRecord(_ timestamp: UInt32) {
+    private func writeSessionMetadataRecord(timestamp: UInt32, observations: [Observation]) {
         let moc = coreDataController.managedObjectContext
         let sessionMetadata = NSEntityDescription.insertNewObject(forEntityName: "SessionMetadata", into: moc) as! SessionMetadataMO
         sessionMetadata.onServerValue = false
         sessionMetadata.timestampValue = timestamp
+        let stats = HeartRateData.calculateStats(observations: observations)
+        if stats != nil {
+            sessionMetadata.thresholdStats = stats
+        }
         coreDataController.save()
     }
 }

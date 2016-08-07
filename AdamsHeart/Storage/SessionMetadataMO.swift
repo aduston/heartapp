@@ -13,8 +13,10 @@ import CoreData
 class SessionMetadataMO: NSManagedObject {
     @NSManaged var timestamp: NSNumber
     @NSManaged var onServer: NSNumber
-    @NSManaged var maxHR: NSNumber?
-    @NSManaged var halvedCount: NSNumber?
+    @NSManaged var meanHRThreshold: NSNumber?
+    @NSManaged var minHRThreshold: NSNumber?
+    @NSManaged var maxHRThreshold: NSNumber?
+    @NSManaged var numHRThreshold: NSNumber?
     
     var timestampValue: UInt32 {
         get {
@@ -33,22 +35,27 @@ class SessionMetadataMO: NSManagedObject {
             onServer = NSNumber(booleanLiteral: newValue)
         }
     }
-    
-    var maxHRValue: UInt8? {
+
+    var thresholdStats: ThresholdStats? {
         get {
-            return maxHR?.uint8Value
+            if meanHRThreshold == nil {
+                return nil
+            } else {
+                return ThresholdStats(
+                    mean: (meanHRThreshold?.uint8Value)!,
+                    min: (minHRThreshold?.uint8Value)!,
+                    max: (maxHRThreshold?.uint8Value)!,
+                    num: (numHRThreshold?.intValue)!)
+            }
         }
         set {
-            maxHR = NSNumber(value: newValue!)
-        }
-    }
-    
-    var halvedCountValue: UInt32? {
-        get {
-            return halvedCount?.uint32Value
-        }
-        set {
-            halvedCount = NSNumber(value: newValue!)
+            guard newValue != nil else {
+                return
+            }
+            meanHRThreshold = NSNumber(value: newValue!.mean)
+            minHRThreshold = NSNumber(value: newValue!.min)
+            maxHRThreshold = NSNumber(value: newValue!.max)
+            numHRThreshold = NSNumber(value: newValue!.num)
         }
     }
 }

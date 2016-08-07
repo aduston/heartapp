@@ -25,7 +25,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
                 DispatchQueue.main.async {
                     // TODO: should the following instantiation be in main thread?
                     self.sessionTableDataSource = SessionTableDataSource(moc: moc)
-                    // SessionStorage.instance.rewriteImages() // temporary
+                    // SessionStorage.instance.migrateData() // temporary
                     self.setUpTable()
                     // TODO: get rid of loading screen.
                 }

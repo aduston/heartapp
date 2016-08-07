@@ -164,4 +164,47 @@ public class HeartRateData {
         }
         return observations
     }
+    
+    static func calculateStats(observations: [Observation]) -> ThresholdStats? {
+        var sum: Double = 0.0
+        var sumSquares: Double = 0.0
+        var min: UInt8 = 255
+        var max: UInt8 = 0
+        var count: Int = 0
+        
+        var lastHalved = false
+        var lastHr: UInt8 = 0
+        
+        for i in 0..<observations.count {
+            let (_, halved, heartRate) = HeartRateData.components(observation: observations[i])
+            if halved && !lastHalved && lastHr != 0 {
+                let dblHR = Double(lastHr)
+                sum += dblHR
+                sumSquares += (dblHR * dblHR)
+                if lastHr < min {
+                    min = lastHr
+                }
+                if lastHr > max {
+                    max = lastHr
+                }
+                count += 1
+            }
+            lastHalved = halved
+            lastHr = heartRate
+        }
+        
+        if count > 0 {
+            let mean = sum / Double(count)
+            let stdDev = sqrt(sumSquares / Double(count) - mean * mean)
+            let reportedMin = Swift.max(Double(min), mean - 3 * stdDev)
+            let reportedMax = Swift.min(Double(max), mean + 3 * stdDev)
+            return ThresholdStats(
+                mean: UInt8(mean),
+                min: UInt8(reportedMin),
+                max: UInt8(reportedMax),
+                num: count)
+        } else {
+            return nil
+        }
+    }
 }
