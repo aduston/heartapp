@@ -12,6 +12,7 @@
 		57436BED1D39391D00AB8BFD /* SessionTableDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57436BEC1D39391D00AB8BFD /* SessionTableDataSource.swift */; };
 		57436BEF1D39847E00AB8BFD /* SessionTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57436BEE1D39847E00AB8BFD /* SessionTableCell.swift */; };
 		574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574524E71D313D8E00947F94 /* ChartDrawer.swift */; };
+		5745EABC1D6EE41100C5E585 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5745EABB1D6EE41100C5E585 /* ApiKey.swift */; };
 		574E44811D3581FB000D69BC /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44801D3581FB000D69BC /* Session.swift */; };
 		574E44881D3694C1000D69BC /* SessionStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574E44871D3694C1000D69BC /* SessionStorage.swift */; };
 		578352001D4578E3003635E6 /* TouchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 578351FF1D4578E3003635E6 /* TouchState.swift */; };
@@ -52,6 +53,7 @@
 		57436BEC1D39391D00AB8BFD /* SessionTableDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionTableDataSource.swift; sourceTree = "<group>"; };
 		57436BEE1D39847E00AB8BFD /* SessionTableCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionTableCell.swift; sourceTree = "<group>"; };
 		574524E71D313D8E00947F94 /* ChartDrawer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartDrawer.swift; sourceTree = "<group>"; };
+		5745EABB1D6EE41100C5E585 /* ApiKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
 		574E44801D3581FB000D69BC /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		574E44871D3694C1000D69BC /* SessionStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SessionStorage.swift; path = Storage/SessionStorage.swift; sourceTree = "<group>"; };
 		578351FF1D4578E3003635E6 /* TouchState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TouchState.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				57EFFC701D37C42E008FB3BF /* CoreDataController.swift */,
 				57EFFC721D37C781008FB3BF /* DataModel.xcdatamodeld */,
 				57F48F0C1D37DB23006E034C /* SessionMetadataMO.swift */,
+				5745EABB1D6EE41100C5E585 /* ApiKey.swift */,
 			);
 			name = Storage;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				574524E81D313D8E00947F94 /* ChartDrawer.swift in Sources */,
 				57EFFC711D37C42E008FB3BF /* CoreDataController.swift in Sources */,
 				57D7997E1D2ABE3F008F7C58 /* MainViewController.swift in Sources */,
+				5745EABC1D6EE41100C5E585 /* ApiKey.swift in Sources */,
 				57D799921D2AD5F8008F7C58 /* HeartRateDelegate.swift in Sources */,
 				57D7999A1D2ADE07008F7C58 /* DevHeartRateMonitor.swift in Sources */,
 				57DA722E1D578D5500A12B07 /* ThresholdStats.swift in Sources */,
