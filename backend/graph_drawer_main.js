@@ -10,7 +10,7 @@ var Image = Canvas.Image;
 
 var drawer = require('./graph_drawer');
 
-var numMinutes = 0.1;
+var numMinutes = 30;
 
 var obs = [];
 

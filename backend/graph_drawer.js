@@ -11,8 +11,18 @@ let Constants = {
   halvedStroke: 'rgba(255,0,0,0.7)',
   regularFill: 'rgba(0,0,255,0.7)',
   halvedFill: '#f00',
-  maxNumBars: 180
+  maxNumBars: 600
 };
+
+class DataSummary {
+  constructor(minSeconds, maxSeconds, minHR, maxHR, hasHalved) {
+    this.minSeconds = minSeconds;
+    this.maxSeconds = maxSeconds;
+    this.minHR = minHR;
+    this.maxHR = maxHR;
+    this.hasHalved = hasHalved
+  }
+}
 
 class Rect {
   constructor(x, y, width, height) {
@@ -131,7 +141,6 @@ class ImageDrawer {
         inHasHalved = obs.halved;
       }
       let y = this._params.yForHR(obs.heartRate);
-      console.log(obs.heartRate, y);
       let x = Math.max(this._params.graphRect.x, curX);
       let nextX = Math.min(curX + this._params.barWidth, this._params.graphRect.maxX);
       this._ctx.fillRect(
@@ -141,20 +150,43 @@ class ImageDrawer {
   }
 
   _drawNarrowValues() {
-    this._drawNarrowValues();
-    this._ctx.strokeStyle = '#00f';
-    var totalWidth = this._width - this._leftMargin - this._rightMargin
-    for (var i = 0; i < totalWidth; i++) {
-      var minMax = this._minAndMaxAt(i, totalWidth);
-      var min = minMax[0];
-      var max = minMax[1];
-      var x = this._leftMargin + i;
-      var y0 = this._height - (this._bottomMargin + (max - this._minValue) * this._beatHeight);
-      this._ctx.beginPath();
-      this._ctx.lineTo(x, y0);
-      this._ctx.lineTo(x, y0 + (max - min) * this._beatHeight);
-      this._ctx.stroke();
-    }    
+    let p = this._params;
+    let labeledMultiple = this._findLabeledMultiple();
+    let obsPerBar = p.numObs / Constants.maxNumBars;
+    let pixelsPerObs = p.graphRect.width / p.numObs;
+    let pixelsPerBar = p.graphRect.width / Constants.maxNumBars;
+    let obsStartX = p.graphRect.x - p.startObs * pixelsPerObs;
+    var barIndex = p.startObs / obsPerBar;
+    var x = obsStartX + barIndex * pixelsPerBar;
+    var lastLabelX = 0;
+    while (x < p.graphRect.maxX) {
+      if (x + pixelsPerBar < p.graphRect.x) {
+        continue;
+      }
+      let summary = this._dataSummary(barIndex * obsPerBar, (barIndex + 1) * obsPerBar);
+      let maxY = p.yForHR(summary.maxHR);
+      let minY = p.yForHR(summary.minHR);
+      let strokeStyle = summary.hasHalved ? Constants.halvedStroke : Constants.regularStroke;
+      let fillStyle = summary.hasHalved ? Constants.halvedFill : Constants.regularFill;
+      let lineX = this._drawGraphValueLine(x, minY, maxY, pixelsPerBar, strokeStyle);
+      this._drawGraphValueLine(x, p.graphRect.maxY, maxY, pixelsPerBar, fillStyle);
+      barIndex += 1;
+      x = obsStartX + barIndex * pixelsPerBar;
+    }
+  }
+
+  _drawGraphValueLine(x, y0, y1, width, style) {
+    let p = this._params;
+    let lineMinX = Math.max(x, p.graphRect.x);
+    let actualWidth = Math.min(width, x + width - p.graphRect.minX, p.graphRect.maxX - x);
+    let lineX = lineMinX + actualWidth / 2.0;
+    this._ctx.lineWidth = actualWidth;
+    this._ctx.strokeStyle = style;
+    this._ctx.beginPath();
+    this._ctx.moveTo(x, y0);
+    this._ctx.lineTo(x, y1);
+    this._ctx.stroke();
+    return lineX;
   }
 
   _findLabeledMultiple() {
@@ -167,6 +199,30 @@ class ImageDrawer {
       }
     }
     return 18000;
+  }
+
+  _dataSummary(startObs, endObs) {
+    let minIndex = Math.max(Math.floor(startObs), 0);
+    let maxIndex = Math.min(Math.ceil(endObs), this._obs.length - 1);
+    let summary = new DataSummary(10000000000, 0, 250, 0, false);
+    for (var i = minIndex; i <= maxIndex; i++) {
+      if (this._obs[i].seconds < summary.minSeconds) {
+        summary.minSeconds = this._obs[i].seconds;
+      }
+      if (this._obs[i].seconds > summary.maxSeconds) {
+        summary.maxSeconds = this._obs[i].seconds;
+      }
+      if (this._obs[i].halved) {
+        summary.hasHalved = true;
+      }
+      if (this._obs[i].heartRate < summary.minHR) {
+        summary.minHR = this._obs[i].heartRate;
+      }
+      if (this._obs[i].heartRate > summary.maxHR) {
+        summary.maxHR = this._obs[i].heartRate;
+      }
+    }
+    return summary;
   }
 }
 
