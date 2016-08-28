@@ -66,9 +66,35 @@ class SessionStorage {
         }
     }
     
+    func writeSessionToServer(timestamp: UInt32, observations: [Observation]) -> Bool {
+        let observationData = HeartRateData.observationsToData(observations: observations)
+        let observationString = observationData.base64EncodedString()
+        let jsonObject: [String: Any] = [
+            "timestamp": Int(timestamp),
+            "observations": observationString
+        ]
+        var json: Data?
+        do {
+            json = try JSONSerialization.data(withJSONObject: jsonObject, options: .init(rawValue: 0))
+        } catch {
+            fatalError("Couldn't make json")
+        }
+        let url = "https://tsflhkt9ik.execute-api.us-east-1.amazonaws.com/prod/HeartSessionResponder"
+        let request = NSMutableURLRequest(url: URL(string: url)!)
+        request.httpMethod = "POST"
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.httpBody = json
+        let task = URLSession.shared.dataTask(with: request as URLRequest) { data, response, error in
+            // TODO
+        }
+        task.resume()
+        return true
+    }
+    
     func saveSession(timestamp: UInt32, observations: [Observation]) -> Bool {
         ensureDataDir()
         writeObservations(timestamp: timestamp, observations: observations)
+        // writeSessionToServer(timestamp: timestamp, observations: observations)
         writeImage(timestamp: timestamp, observations: observations)
         writeSessionMetadataRecord(timestamp: timestamp, observations: observations)
         return true // TODO: account for other possible errors

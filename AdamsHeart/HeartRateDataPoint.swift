@@ -15,7 +15,7 @@ struct HeartRateDataPoint {
     var rrInterval: UInt16?
     
     var calculatedHR: UInt16 {
-        if rrInterval == nil || rrInterval < 235 {
+        if rrInterval == nil || rrInterval! < 235 {
             return hr
         } else {
             return 60000 / rrInterval!

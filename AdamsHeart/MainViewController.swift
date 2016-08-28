@@ -67,7 +67,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
         }
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "sessionDetail" {
             let destination = segue.destination as! SessionDetailViewController
             destination.sessionMetadata = selectedSession

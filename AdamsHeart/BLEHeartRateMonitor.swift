@@ -158,15 +158,15 @@ class BLEHeartRateMonitor: NSObject, HeartRateMonitor, CBCentralManagerDelegate,
         if flags.hrSize == 1 {
             hr = UInt16(bytes[1])
         } else {
-            hr = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + 1)[0])
+            hr = CFSwapInt16LittleToHost(UnsafeRawPointer(bytes + 1).load(as: UInt16.self))
         }
         var curOffset = 1 + flags.hrSize
         if flags.energyExpended {
-            energy = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + curOffset)[0])
+            energy = CFSwapInt16LittleToHost(UnsafeRawPointer(bytes + curOffset).load(as: UInt16.self))
             curOffset += 2
         }
         if flags.rrInterval {
-            rrInterval = CFSwapInt16LittleToHost(UnsafePointer<UInt16>(bytes + curOffset)[0])
+            rrInterval = CFSwapInt16LittleToHost(UnsafeRawPointer(bytes + curOffset).load(as: UInt16.self))
             rrInterval = UInt16(Double(rrInterval!) / 1024.0 * 1000.0)
         }
         // TODO: is this the right sequence of calls to dealloc?

@@ -94,8 +94,8 @@ public class ChartDrawer {
             let y = params.yForHR(hr)
             let strokeDarkness: CGFloat = labeledLine ? 0.0 : 0.7
             c.setStrokeColor(red: strokeDarkness, green: strokeDarkness, blue: strokeDarkness, alpha: 1.0)
-            c.moveTo(x: params.graphRect.minX, y: y)
-            c.addLineTo(x: params.graphRect.maxX, y: y)
+            c.move(to: CGPoint(x: params.graphRect.minX, y: y))
+            c.addLine(to: CGPoint(x: params.graphRect.maxX, y: y))
             c.strokePath()
             if labeledLine && hr > ChartParams.minRate {
                 addHRLabel(params: params, hr: hr, y: y)
@@ -177,8 +177,8 @@ public class ChartDrawer {
         c.beginPath()
         c.setStrokeColor(color)
         c.setLineWidth(actualWidth)
-        c.moveTo(x: lineX, y: y0)
-        c.addLineTo(x: lineX, y: y1)
+        c.move(to: CGPoint(x: lineX, y: y0))
+        c.addLine(to: CGPoint(x: lineX, y: y1))
         c.strokePath()
         return lineX
     }
@@ -236,8 +236,8 @@ public class ChartDrawer {
             c.beginPath()
             c.setStrokeColor(CGColor(colorSpace: CGColorSpaceCreateDeviceRGB(), components:[0.0, 0.0, 0.0, 1.0])!)
             c.setLineWidth(1.0)
-            c.moveTo(x: midX, y: params.graphRect.maxY)
-            c.addLineTo(x: midX, y: params.graphRect.maxY + 5)
+            c.move(to: CGPoint(x: midX, y: params.graphRect.maxY))
+            c.addLine(to: CGPoint(x: midX, y: params.graphRect.maxY + 5))
             c.strokePath()
         } else {
             return 0.0
