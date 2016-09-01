@@ -8,7 +8,7 @@ var fs = require('fs');
 var Image = Canvas.Image;
 
 
-var drawer = require('./graph_drawer');
+var GraphDrawer = require('./graph_drawer');
 
 var numMinutes = 30;
 
@@ -31,9 +31,9 @@ for (var i = 1; i < 60 * numMinutes; i++) {
 }
 
 let canvas = new Canvas(1200, 400);
-var imageDrawer = new drawer.ImageDrawer(1200, 400, obs);
+var graphDrawer = new GraphDrawer(1200, 400, obs);
 
-imageDrawer.draw(canvas, 0.3, 60 * numMinutes - 1)
+graphDrawer.draw(canvas, 0.3, 60 * numMinutes - 1)
 canvas.toBuffer(function(err, buf) {
   if (err == null) {
     fs.writeFile("/Users/aduston/hr.png", buf);

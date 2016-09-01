@@ -72,7 +72,7 @@ class ChartParams {
   }
 }
 
-class ImageDrawer {
+class GraphDrawer {
   constructor(width, height, observationObjs) {
     this._outerRect = new Rect(0, 0, width, height);
     this._obs = observationObjs;
@@ -226,4 +226,4 @@ class ImageDrawer {
   }
 }
 
-exports.ImageDrawer = ImageDrawer;
+module.exports = GraphDrawer;
