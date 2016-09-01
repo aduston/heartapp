@@ -1,6 +1,7 @@
 "use strict"
 
 var AWS = require('aws-sdk');
+var async = require('async');
 
 var localddb = new AWS.DynamoDB({
   apiVersion: '2012-08-10',
@@ -36,16 +37,18 @@ class TableDef {
       AttributeDefinitions: attDefs
     }
   }
-  create(ddb) {
+  create(ddb, done) {
     ddb.createTable(this.toCreateParams(), function(err, data) {
       if (err) console.log(err, err.stack);
       else console.log(data);
+      done(err, data);
     });
   }
-  delete(ddb) {
+  delete(ddb, done) {
     ddb.deleteTable({ TableName: this.tableName }, function(err, data) {
       if (err) console.log(err, err.stack);
       else console.log(data);
+      done(err, data);
     });
   }
 }
@@ -53,20 +56,32 @@ class TableDef {
 function tableDefs() {
   return [
     new TableDef("HeartSessions", [["SessionShard", "N"], ["SessionTimestamp", "N"]], [5, 5])
-  ]
+  ];
 }
 
-function createAll(ddb) {
+function createAll(ddb, callback) {
+  var calls = [];
   for (var tableDef of tableDefs()) {
-    tableDef.create(ddb)
+    calls.push(function(tableDef) {
+      return function(callback) { tableDef.create(ddb, callback); };
+    }(tableDef));
   }
+  async.parallel(calls, callback);
 }
 
-function deleteAll(ddb) {
+function deleteAll(ddb, callback) {
+  var calls = [];
   for (var tableDef of tableDefs()) {
-    tableDef.delete(ddb)
+    calls.push(function(tableDef) {
+      return function(callback) { tableDef.delete(ddb, callback); };
+    }(tableDef));
   }
+  async.parallel(calls, function(err, result) { callback(null, result); });
 }
 
-deleteAll(localddb)
-createAll(localddb)
+exports.deleteAndCreateLocal = function(done) {
+  async.series([
+    function(callback) { deleteAll(localddb, callback); },
+    function(callback) { createAll(localddb, callback); }
+  ], done);
+};

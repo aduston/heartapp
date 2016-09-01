@@ -14,8 +14,8 @@ exports.getDDB = function() {
   return ddb
 };
 
-exports.initForTesting = function() {
-  
+exports.initForTesting = function(callback) {
+  callback(null, "done");
 };
 
 /**
