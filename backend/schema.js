@@ -85,3 +85,6 @@ exports.deleteAndCreateLocal = function(done) {
     function(callback) { createAll(localddb, callback); }
   ], done);
 };
+
+exports.createAll = createAll;
+exports.deleteAll = deleteAll;

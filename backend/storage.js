@@ -6,6 +6,8 @@ var ddb = null
 var s3 = new AWS.S3()
 var cloudfront = new AWS.CloudFront()
 
+var testingStorageObj = null;
+
 exports.getDDB = function() {
   if (!ddb) {
     var service = new AWS.DynamoDB()
@@ -15,7 +17,11 @@ exports.getDDB = function() {
 };
 
 exports.initForTesting = function(callback) {
-  callback(null, "done");
+  testingStorageObj = {
+    savedObjects: [],
+    invalidatedPaths: []
+  };
+  callback(null, testingStorageObj);
 };
 
 /**
@@ -26,9 +32,19 @@ exports.initForTesting = function(callback) {
  * Body can be text or a buffer.
  */
 exports.saveObject = function(key, body, contentType, callback) {
-  callback(null, "done");
+  if (testingStorageObj != null) {
+    testingStorageObj.savedObjects.push({ key: key, body: body, contentType: contentType });
+    callback(null, "okay");
+  } else {
+    // TODO: save to S3
+  }
 };
 
 exports.invalidatePath = function(path, callback) {
-  callback(null, "done");
+  if (testingStorageObj != null) {
+    testingStorageObj.invalidatedPaths.push(path);
+    callback(null, "done");
+  } else {
+    // TODO: invalidate in cloudfront
+  }
 };

@@ -18,22 +18,43 @@ describe("session_responder", function() {
         schema.deleteAndCreateLocal(callback);
       },
       function(callback) {
-        storageObj = storage.initForTesting(callback);
+        storage.initForTesting(function(err, result) {
+          storageObj = result;
+          callback(err, result);
+        });
       }
     ], done);
   });
 
+  it("saves an image", function(done) {
+    async.series(
+      [
+        function(callback) {
+          sessionResponder.handler(
+            {
+              timestamp: 123123,
+              observations: "AAAAUwAAAFYAAAFZAAACXA=="
+            }, null, callback);
+        }
+      ],
+      function(err, result) {
+        expect(err).toBeNull();
+        var images = storageObj.savedObjects.filter(function(o) { return o.contentType == "image/png" });
+        expect(images.length).toEqual(1);
+        done();
+      });
+  });
+
   it("saves a record", function(done) {
-    async.waterfall([
-      utils.uniqueNumber,
-      function(uniqueNumber, callback) {
+    async.series([
+      function(callback) {
         sessionResponder.handler(
           {
             timestamp: 123123,
             observations: "AAAAUwAAAFYAAAFZAAACXA=="
           }, null, callback);
       },
-      function(result, callback) {
+      function(callback) {
         storage.getDDB().get({
           TableName: "HeartSessions",
           Key: {
@@ -44,8 +65,10 @@ describe("session_responder", function() {
         }, callback);
       }
     ], function(err, result) {
-      console.log("Error", err);
-      console.log("Result", result);
+      expect(err).toBeNull();
+      var item = result[1].Item;
+      expect(item.SessionTimestamp).toEqual(123123);
+      expect(item.Observations.toString('base64')).toEqual('AAAAUwAAAFYAAAFZAAACXA==');
       done();
     });
   });
