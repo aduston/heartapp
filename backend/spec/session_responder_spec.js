@@ -60,17 +60,45 @@ describe("session_responder", function() {
         expect(err).toBeNull();
         var htmls = storageObj.savedObjects.filter(function(o) { return o.contentType == "text/html" });
         expect(htmls.length).toEqual(1);
-        console.log(htmls);
         done();
       });
   });
 
   it("saves a new index.html with a thousand", function(done) {
-    done();
-  });
-
-  it("saves the source json", function(done) {
-    done();
+    var callables = []
+    var ddb = storage.getDDB();
+    for (var i = 0; i < 1000; i++) {
+      callables.push(function(i) {
+        return function(callback) {
+          ddb.put({
+            TableName: "HeartSessions",
+            Item: {
+              "SessionShard": 0,
+              "SessionTimestamp": 123123 + i,
+              "Observations": new Buffer("AAAAUwAAAFYAAAFZAAACXA=="),
+              "Version": 0
+            }
+          }, callback);
+        };
+      }(i));
+    }
+    async.series([
+      function(callback) {
+        async.parallel(callables, callback);
+      },
+      function(callback) {
+        sessionResponder.handler(
+          {
+            timestamp: 124123,
+            observations: "AAAAUwAAAFYAAAFZAAACXA==",
+          }, null, callback);
+      }], function(err, result) {
+        expect(err).toBeNull();
+        var htmls = storageObj.savedObjects.filter(function(o) { return o.contentType == "text/html" });
+        expect(htmls.length).toEqual(1);
+        // TODO: in future, look at content of html
+        done();
+      });
   });
 
   it("saves a record", function(done) {
