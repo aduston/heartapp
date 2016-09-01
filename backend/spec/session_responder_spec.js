@@ -45,6 +45,34 @@ describe("session_responder", function() {
       });
   });
 
+  it("saves a new index.html", function(done) {
+    async.series(
+      [
+        function(callback) {
+          sessionResponder.handler(
+            {
+              timestamp: 123123,
+              observations: "AAAAUwAAAFYAAAFZAAACXA=="
+            }, null, callback);
+        }
+      ],
+      function(err, result) {
+        expect(err).toBeNull();
+        var htmls = storageObj.savedObjects.filter(function(o) { return o.contentType == "text/html" });
+        expect(htmls.length).toEqual(1);
+        console.log(htmls);
+        done();
+      });
+  });
+
+  it("saves a new index.html with a thousand", function(done) {
+    done();
+  });
+
+  it("saves the source json", function(done) {
+    done();
+  });
+
   it("saves a record", function(done) {
     async.series([
       function(callback) {

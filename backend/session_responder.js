@@ -89,8 +89,10 @@ function updateHTML(item, callback) {
       runQuery(callback);
     },
     function(results, callback) {
-      results.push(item);
-      results.sort(function(a, b) { return a['SessionTimestamp'] > b['SessionTimestamp'] ? -1 : 1 });
+      if (!results.find(function(i) { return i.SessionTimestamp == item.SessionTimestamp; })) {
+        results.push(item);
+      }
+      results.sort(function(a, b) { return a.SessionTimestamp > b.SessionTimestamp ? -1 : 1 });
       updateHTMLWithResults(results, callback);
     }
   ], callback);
@@ -100,21 +102,21 @@ function updateHTMLWithResults(results, callback) {
   var resultsJson = JSON.stringify(results.map(function(result) {
     return result["SessionTimestamp"] + "." + result["Version"];
   }));
-  var html = new Buffer(
-    '<!doctype html><html lang="en">' +
-      '<head><meta charset="utf-8"><title>Adam\'s Heart</title></head>' +
-      '<body>');
+  var html = [
+    '<!doctype html><html lang="en">',
+    '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>',
+    '<body>'];
   var numResultsToWrite = Math.min(10, results.length);
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i]);
   }
-  html.write('<script>var timestamps = ');
-  html.write(resultsJson);
-  html.write(';</script></body></html>');
-  var htmlString = html.toString();
+  html.push("<script>var timestamps = ");
+  html.push(resultsJson);
+  html.push(';</script></body></html>');
+  var htmlString = html.join('');
   async.waterfall([
     function(callback) {
-      storage.saveObject("index.html", html, "text/html", callback);
+      storage.saveObject("index.html", htmlString, "text/html", callback);
     },
     function(result, callback) {
       storage.invalidatePath('/index.html', callback);
@@ -123,8 +125,8 @@ function updateHTMLWithResults(results, callback) {
 }
 
 function writeResultToHTML(html, result) {
-  html.write('<div><img src="/' + result['SessionTimestamp'] + '.' +
-             result['Version'] + '.png"</img></div>');
+  html.push('<div><img src="', result['SessionTimestamp'], '.',
+            result['Version'], '.png"></img></div>');
 }
 
 function runQuery(callback) {
