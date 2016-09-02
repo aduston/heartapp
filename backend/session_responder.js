@@ -6,6 +6,7 @@ var session = require('./session');
 var storage = require('./storage');
 var GraphDrawer = require('./graph_drawer');
 var Canvas = require('canvas');
+var StringBuilder = require('stringbuilder');
 
 let VERSION = 0;
 
@@ -102,21 +103,23 @@ function updateHTMLWithResults(results, callback) {
   var resultsJson = JSON.stringify(results.map(function(result) {
     return result["SessionTimestamp"] + "." + result["Version"];
   }));
-  var html = [
-    '<!doctype html><html lang="en">',
-    '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>',
-    '<body>'];
+  var html = new StringBuilder();
+  html.append('<!doctype html><html lang="en">' +
+              '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>' +
+              '<body>');
   var numResultsToWrite = Math.min(10, results.length);
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i]);
   }
-  html.push("<script>var timestamps = ");
-  html.push(resultsJson);
-  html.push(';</script></body></html>');
-  var htmlString = html.join('');
+  html.append("<script>var timestamps = ");
+  html.append(resultsJson);
+  html.append(';</script></body></html>');
   async.waterfall([
     function(callback) {
-      storage.saveObject("index.html", htmlString, "text/html", callback);
+      html.build(callback);
+    },
+    function(result, callback) {
+      storage.saveObject("index.html", result, "text/html", callback);
     },
     function(result, callback) {
       storage.invalidatePath('/index.html', callback);
@@ -125,8 +128,8 @@ function updateHTMLWithResults(results, callback) {
 }
 
 function writeResultToHTML(html, result) {
-  html.push('<div><img src="', result['SessionTimestamp'], '.',
-            result['Version'], '.png"></img></div>');
+  html.append('<div><img src="', result['SessionTimestamp'], '.',
+              result['Version'], '.png"></img></div>');
 }
 
 function runQuery(callback) {

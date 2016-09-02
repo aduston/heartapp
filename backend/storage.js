@@ -6,6 +6,9 @@ var ddb = null
 var s3 = new AWS.S3()
 var cloudfront = new AWS.CloudFront()
 
+let S3_BUCKET = 'adamsheart-site';
+let CLOUDFRONT_ID = 'E2QVTW8XZXK8E7';
+
 var testingStorageObj = null;
 
 exports.getDDB = function() {
@@ -36,7 +39,14 @@ exports.saveObject = function(key, body, contentType, callback) {
     testingStorageObj.savedObjects.push({ key: key, body: body, contentType: contentType });
     callback(null, "okay");
   } else {
-    // TODO: save to S3
+    var params = {
+      Bucket: S3_BUCKET,
+      Key: key,
+      ACL: 'public-read',
+      Body: body,
+      ContentType: contentType
+    };
+    s3.putObject(params, callback);
   }
 };
 
@@ -46,5 +56,16 @@ exports.invalidatePath = function(path, callback) {
     callback(null, "done");
   } else {
     // TODO: invalidate in cloudfront
+    var params = {
+      DistributionId: CLOUDFRONT_ID,
+      InvalidationBatch: {
+        CallerReference: ('' + new Date().getTime()),
+        Paths: {
+          Quantity: 1,
+          Items: [path]
+        }
+      }
+    };
+    cloudfront.createInvalidation(params, callback);
   }
 };
