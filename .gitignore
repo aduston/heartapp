@@ -25,6 +25,7 @@ project.xcworkspace
 
 # Node
 node_modules
+canvasdeps
 *.log
 .nvm
 
