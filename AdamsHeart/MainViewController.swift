@@ -22,6 +22,7 @@ class MainViewController: UIViewController, UITableViewDelegate {
             DispatchQueue.global(qos: .userInteractive).async {
                 // note the following call is potentially long-running.
                 let moc = SessionStorage.instance.coreDataController.managedObjectContext
+                _ = SessionStorage.instance.saveRandomUnsavedSessions(limit: 1)
                 DispatchQueue.main.async {
                     // TODO: should the following instantiation be in main thread?
                     self.sessionTableDataSource = SessionTableDataSource(moc: moc)

@@ -66,12 +66,60 @@ class SessionStorage {
         }
     }
     
-    func writeSessionToServer(timestamp: UInt32, observations: [Observation]) -> Bool {
+    func updateToOnServer(timestamp: UInt32) {
+        let sessionFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
+        sessionFetch.predicate = NSPredicate(format: "timestamp == %@", NSNumber(value: timestamp))
+
+        let moc = coreDataController.managedObjectContext
+        do {
+            let fetchedSessions = try moc.fetch(sessionFetch)
+            if fetchedSessions.count > 0 {
+                let fetchedSession = fetchedSessions[0]
+                fetchedSession.onServerValue = true
+                try moc.save()
+            }
+        } catch {
+            fatalError("Failed to update session: \(error)")
+        }
+    }
+    
+    func saveRandomUnsavedSessions(limit: Int) -> Bool {
+        let moc = coreDataController.managedObjectContext
+        let sessionFetch: NSFetchRequest<SessionMetadataMO> = NSFetchRequest(entityName: "SessionMetadata")
+        sessionFetch.predicate = NSPredicate(format: "onServer == %@", NSNumber(value: false))
+        sessionFetch.fetchLimit = limit
+        var timestamps: [UInt32] = []
+        do {
+            let fetchedSessions = try moc.fetch(sessionFetch)
+            for fetchedSession in fetchedSessions {
+                timestamps.append(fetchedSession.timestampValue)
+            }
+        } catch {
+            fatalError("Failed to fetch session: \(error)")
+        }
+        if timestamps.count == 0 {
+            print("No unsaved sessions found")
+            return false
+        }
+        for timestamp in timestamps {
+            let observations = sessionObservations(timestamp: timestamp)
+            if observations != nil {
+                writeSessionToServer(timestamp: timestamp, observations: observations!)
+            }
+        }
+        return true
+    }
+    
+    func writeSessionToServer(timestamp: UInt32, observations: [Observation]) {
         let observationData = HeartRateData.observationsToData(observations: observations)
         let observationString = observationData.base64EncodedString()
-        let jsonObject: [String: Any] = [
+        let jsonDataObject: [String: Any] = [
             "timestamp": Int(timestamp),
             "observations": observationString
+        ]
+        let jsonObject: [String: Any] = [
+            "operation": "new_session",
+            "data": jsonDataObject
         ]
         var json: Data?
         do {
@@ -84,19 +132,27 @@ class SessionStorage {
         request.httpMethod = "POST"
         request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.httpBody = json
+        print("Going to start task of saving data for \(timestamp)")
         let task = URLSession.shared.dataTask(with: request as URLRequest) { data, response, error in
-            // TODO
+            print("Finish URLSession task, with data \(data), response \(response), error \(error)");
+            if error == nil {
+                self.updateToOnServer(timestamp: timestamp)
+                print("Successfully updated \(timestamp) on server")
+            } else {
+                print("Failed to update \(timestamp) on server: \(error?.localizedDescription)")
+            }
         }
         task.resume()
-        return true
     }
     
     func saveSession(timestamp: UInt32, observations: [Observation]) -> Bool {
         ensureDataDir()
         writeObservations(timestamp: timestamp, observations: observations)
-        // writeSessionToServer(timestamp: timestamp, observations: observations)
         writeImage(timestamp: timestamp, observations: observations)
         writeSessionMetadataRecord(timestamp: timestamp, observations: observations)
+        DispatchQueue.global(qos: .userInteractive).async {
+            _ = self.writeSessionToServer(timestamp: timestamp, observations: observations)
+        }
         return true // TODO: account for other possible errors
     }
     

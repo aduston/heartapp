@@ -9,14 +9,94 @@ var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
 var moment = require('moment');
 
-let VERSION = 0;
+let VERSION = 1;
 let IMAGE_WIDTH = 1200;
 let IMAGE_HEIGHT = 300;
+// iOS reports timestamp in seconds since 1/1/2001.
+let TIMESTAMP_OFFSET = 978307200;
+
+exports.TIMESTAMP_OFFSET = TIMESTAMP_OFFSET;
+exports.VERSION = VERSION;
 
 exports.handler = function(event, context, callback) {
   console.log('Received event:', JSON.stringify(event, null, 2));
-  let timestamp = event['timestamp'];
-  let observations = new Buffer(event['observations'], 'base64');
+  if (event['operation'] == 'new_session') {
+    saveNewSession(event['data'], callback)
+  } else if (event['operation'] == 'refresh') {
+    refreshEverything(callback);
+  }
+};
+
+function refreshEverything(callback) {
+  async.series(
+    [
+      function(callback) { refreshItems(callback) },
+      function(callback) { updateIndexHTML(null, callback); }
+    ],
+    function(err, result) {
+      if (err == null) {
+        callback(null, { "success": true })
+      } else {
+        callback(err, null)
+      }
+    }
+  )
+}
+
+function refreshItems(callback) {
+  async.waterfall(
+    [
+      runQuery,
+      function(sessions, callback) {
+        var callables = [];
+        for (var i = 0; i < sessions.length; i++) {
+          if (sessions[i].Version < VERSION) {
+            callables.push(function(session){
+              return function(callback) { refreshItem(session.SessionTimestamp, callback); };
+            }(sessions[i]));
+          }
+        }
+        async.parallel(callables, callback);
+      }
+    ], callback);
+}
+
+function refreshItem(sessionTimestamp, callback) {
+  async.waterfall([
+    function(callback) {
+      fetchFullItem(sessionTimestamp, callback);
+    },
+    function(fullItem, callback) {
+      async.parallel([
+        function(callback) { saveImage(sessionTimestamp, fullItem.Observations, callback); },
+        function(callback) { updateSessionHTML(fullItem, callback); }
+      ], callback);
+    },
+    function(result, callback) {
+      updateItemVersion(sessionTimestamp, callback);
+    }
+  ], callback);
+}
+
+function fetchFullItem(timestamp, callback) {
+  storage.getDDB().get({
+    TableName: "HeartSessions",
+    Key: {
+      SessionShard: 0,
+      SessionTimestamp: timestamp
+    }
+  }, function(err, result) {
+    if (err != null) {
+      callback(err, result);
+    } else {
+      callback(null, result.Item);
+    }
+  });
+}
+
+function saveNewSession(data, callback) {
+  let timestamp = data['timestamp'] + TIMESTAMP_OFFSET;
+  let observations = new Buffer(data['observations'], 'base64');
   let item = makeItem(timestamp, observations);
   async.parallel(
     [
@@ -41,7 +121,7 @@ exports.handler = function(event, context, callback) {
       }
     }
   );
-};
+}
 
 function makeItem(timestamp, observations) {
   return {
@@ -120,7 +200,7 @@ function updateIndexHTML(item, callback) {
       runQuery(callback);
     },
     function(results, callback) {
-      if (!results.find(function(i) { return i.SessionTimestamp == item.SessionTimestamp; })) {
+      if (item != null && !results.find(function(i) { return i.SessionTimestamp == item.SessionTimestamp; })) {
         results.push(item);
       }
       results.sort(function(a, b) { return a.SessionTimestamp > b.SessionTimestamp ? -1 : 1 });
@@ -131,7 +211,7 @@ function updateIndexHTML(item, callback) {
 
 function updateHTMLWithResults(results, callback) {
   var resultsJson = JSON.stringify(results.map(function(result) {
-    return result["SessionTimestamp"] + "." + result["Version"];
+    return result.SessionTimestamp + "." + result.Version;
   }));
   var html = new StringBuilder();
   html.append('<!doctype html><html lang="en">' +
@@ -202,3 +282,15 @@ function runRawQuery(lastEvaluatedKey, callback) {
   }
   storage.getDDB().query(params, callback);
 };
+
+function updateItemVersion(timestamp, callback) {
+  let params = {
+    TableName: "HeartSessions",
+    Key: { SessionShard: 0, SessionTimestamp: timestamp },
+    UpdateExpression: "set Version = :version",
+    ExpressionAttributeValues: {
+      ':version': VERSION
+    }
+  };
+  storage.getDDB().update(params, callback);
+}

@@ -8,9 +8,9 @@ let Constants = {
   spaceLeft: 30,
   spaceBottom: 25,
   regularStroke: '#00c',
-  halvedStroke: 'rgba(255,0,0,0.7)',
+  halvedStroke: '#f00',
   regularFill: 'rgba(0,0,255,0.7)',
-  halvedFill: '#f00',
+  halvedFill: 'rgba(255,0,0,0.7)',
   maxNumBars: 600
 };
 
