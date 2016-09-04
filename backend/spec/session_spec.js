@@ -4,6 +4,7 @@ var utils = require('./helpers/utils')
 var storage = require('../storage')
 var AWS = require('aws-sdk')
 var async = require('async')
+var fs = require('fs');
 
 describe("session", function() {
   var session = require('../session')

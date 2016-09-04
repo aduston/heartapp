@@ -9,7 +9,7 @@ var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
 var moment = require('moment');
 
-let VERSION = 1;
+let VERSION = 2;
 let IMAGE_WIDTH = 1200;
 let IMAGE_HEIGHT = 300;
 // iOS reports timestamp in seconds since 1/1/2001.
@@ -23,14 +23,14 @@ exports.handler = function(event, context, callback) {
   if (event['operation'] == 'new_session') {
     saveNewSession(event['data'], callback)
   } else if (event['operation'] == 'refresh') {
-    refreshEverything(callback);
+    refreshEverything(updateItemImageAndHTML, callback);
   }
 };
 
-function refreshEverything(callback) {
+function refreshEverything(itemFn, callback) {
   async.series(
     [
-      function(callback) { refreshItems(callback) },
+      function(callback) { refreshItems(itemFn, callback); },
       function(callback) { updateIndexHTML(null, callback); }
     ],
     function(err, result) {
@@ -43,7 +43,7 @@ function refreshEverything(callback) {
   )
 }
 
-function refreshItems(callback) {
+function refreshItems(itemFn, callback) {
   async.waterfall(
     [
       runQuery,
@@ -51,8 +51,8 @@ function refreshItems(callback) {
         var callables = [];
         for (var i = 0; i < sessions.length; i++) {
           if (sessions[i].Version < VERSION) {
-            callables.push(function(session){
-              return function(callback) { refreshItem(session.SessionTimestamp, callback); };
+            callables.push(function(session) {
+              return function(callback) { refreshItem(session.SessionTimestamp, itemFn, callback); };
             }(sessions[i]));
           }
         }
@@ -61,20 +61,22 @@ function refreshItems(callback) {
     ], callback);
 }
 
-function refreshItem(sessionTimestamp, callback) {
+function refreshItem(sessionTimestamp, itemFn, callback) {
   async.waterfall([
     function(callback) {
       fetchFullItem(sessionTimestamp, callback);
     },
-    function(fullItem, callback) {
-      async.parallel([
-        function(callback) { saveImage(sessionTimestamp, fullItem.Observations, callback); },
-        function(callback) { updateSessionHTML(fullItem, callback); }
-      ], callback);
-    },
+    itemFn,
     function(result, callback) {
       updateItemVersion(sessionTimestamp, callback);
     }
+  ], callback);
+}
+
+function updateItemImageAndHTML(fullItem, callback) {
+  async.parallel([
+    function(callback) { saveImage(fullItem.SessionTimestamp, fullItem.Observations, callback); },
+    function(callback) { updateSessionHTML(fullItem, callback); }
   ], callback);
 }
 
