@@ -128,8 +128,8 @@ function updateHTMLWithResults(results, callback) {
 }
 
 function writeResultToHTML(html, result) {
-  html.append('<div><img src="', result['SessionTimestamp'], '.',
-              result['Version'], '.png"></img></div>');
+  html.append('<div><img src="' + result['SessionTimestamp'] + '.' +
+              result['Version'] + '.png"></img></div>');
 }
 
 function runQuery(callback) {

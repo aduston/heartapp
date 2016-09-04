@@ -31,3 +31,5 @@ canvasdeps
 
 # OS X
 .DS_Store
+
+testservice.sh

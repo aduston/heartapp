@@ -55,7 +55,7 @@ class TableDef {
 
 function tableDefs() {
   return [
-    new TableDef("HeartSessions", [["SessionShard", "N"], ["SessionTimestamp", "N"]], [5, 5])
+    new TableDef("HeartSessions", [["SessionShard", "N"], ["SessionTimestamp", "N"]], [7, 4])
   ];
 }
 
@@ -85,6 +85,6 @@ exports.deleteAndCreateLocal = function(done) {
     function(callback) { createAll(localddb, callback); }
   ], done);
 };
-
+exports.realddb = realddb;
 exports.createAll = createAll;
 exports.deleteAll = deleteAll;
