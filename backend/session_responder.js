@@ -7,6 +7,7 @@ var storage = require('./storage');
 var GraphDrawer = require('./graph_drawer');
 var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
+var moment = require('moment');
 
 let VERSION = 0;
 let IMAGE_WIDTH = 1200;
@@ -76,7 +77,7 @@ function saveImage(timestamp, observations, callback) {
 }
 
 function saveDataToJSON(timestamp, observations, callback) {
-  let fileName = timestamp + "." + VERSION + ".json";
+  let fileName = timestamp + ".json";
   var json = JSON.stringify(session.convertToObjArray(observations).map(
     function(obs) {
       return [obs.seconds, (obs.halved ? 1 : 0), obs.heartRate];
@@ -85,6 +86,35 @@ function saveDataToJSON(timestamp, observations, callback) {
 }
 
 function updateHTML(item, callback) {
+  async.parallel([
+    function(callback) { updateIndexHTML(item, callback); },
+    function(callback) { updateSessionHTML(item, callback); }
+  ], callback);
+}
+
+function updateSessionHTML(item, callback) {
+  var formattedTimestamp = moment.unix(item.SessionTimestamp).format('MMMM Do YYYY, h:mm:ss a');
+  var title = "Adam&apos;s Heart: " + formattedTimestamp;
+  var html = new StringBuilder();
+  html.append('<!doctype html><html lang="en">' +
+              '<head><meta charset="utf-8"><title>' + title + '</title></head>' +
+              '<body>');
+  writeResultToHTML(html, item);
+  html.append("<script>var timestamp = " + item.SessionTimestamp + ";</script></body></html>");
+  async.waterfall([
+    function(callback) {
+      html.build(callback);
+    },
+    function(result, callback) {
+      storage.saveObject("" + item.SessionTimestamp, result, "text/html", callback);
+    },
+    function(result, callback) {
+      storage.invalidatePath("/" + item.SessionTimestamp, callback);
+    }
+  ], callback);
+}
+
+function updateIndexHTML(item, callback) {
   async.waterfall([
     function(callback) {
       runQuery(callback);
@@ -128,7 +158,8 @@ function updateHTMLWithResults(results, callback) {
 }
 
 function writeResultToHTML(html, result) {
-  html.append('<div><img src="' + result['SessionTimestamp'] + '.' +
+  html.append('<div id="session-' + result.SessionTimestamp  + '"><img src="' +
+              result.SessionTimestamp + '.' +
               result['Version'] + '.png" width="' + IMAGE_WIDTH +
               '" height="' + IMAGE_HEIGHT + '"></img></div>');
 }
