@@ -9,6 +9,8 @@ var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
 
 let VERSION = 0;
+let IMAGE_WIDTH = 1200;
+let IMAGE_HEIGHT = 300;
 
 exports.handler = function(event, context, callback) {
   console.log('Received event:', JSON.stringify(event, null, 2));
@@ -59,11 +61,9 @@ function saveRecord(item, callback) {
 
 function saveImage(timestamp, observations, callback) {
   let fileName = timestamp + "." + VERSION + ".png";
-  let width = 1200;
-  let height = 300;
   var objArray = session.convertToObjArray(observations);
-  var graphDrawer = new GraphDrawer(width, height, objArray);
-  let canvas = new Canvas(width, height);
+  var graphDrawer = new GraphDrawer(IMAGE_WIDTH, IMAGE_HEIGHT, objArray);
+  let canvas = new Canvas(IMAGE_WIDTH, IMAGE_HEIGHT);
   graphDrawer.draw(canvas, 0, objArray.length);
   async.waterfall([
     function(callback) {
@@ -129,7 +129,8 @@ function updateHTMLWithResults(results, callback) {
 
 function writeResultToHTML(html, result) {
   html.append('<div><img src="' + result['SessionTimestamp'] + '.' +
-              result['Version'] + '.png"></img></div>');
+              result['Version'] + '.png" width="' + IMAGE_WIDTH +
+              '" height="' + IMAGE_HEIGHT + '"></img></div>');
 }
 
 function runQuery(callback) {
