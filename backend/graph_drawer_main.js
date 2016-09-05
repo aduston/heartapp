@@ -7,37 +7,24 @@ var Canvas = require('canvas');
 var fs = require('fs');
 var async = require('async');
 var storage = require('./storage');
+var session = require('./session');
 
 var Image = Canvas.Image;
 var GraphDrawer = require('./graph_drawer');
 
-var service = new AWS.DynamoDB({
-  apiVersion: '2012-08-10',
-  region: 'us-east-1'
-});
-var ddb = new AWS.DynamoDB.DocumentClient({ service: service });
+let b64text = fs.readFileSync("/Users/aduston/dev/heartapp/backend/spec/heartdata.txt", { encoding: 'ascii'});
+let buf = new Buffer(b64text, 'base64');
+var obs = session.convertToObjArray(buf);
 
-async.waterfall([
-  function(callback) {
-    ddb.get({
-      TableName: "HeartSessions",
-      Key: {
-        SessionShard: 0,
-        SessionTimestamp: 1472845130
-      }
-    }, callback);
-  },
-  function(result, callback) {
-    var item = result.Item;
-    console.log(item.Observations);
-    var b64string = item.Observations.toString('base64');
-    var newBuf = new Buffer(b64string, 'base64');
-    console.log(newBuf);
-    fs.writeFile("/Users/aduston/dev/heartapp/backend/spec/heartdata.txt", b64string);
-    let b64text = fs.readFileSync("/Users/aduston/dev/heartapp/backend/spec/heartdata.txt", { encoding: 'ascii'});
-    console.log(b64text.substring(0, 20));
-    var buf = new Buffer(b64text, 'base64');
-    console.log(buf);
-  }], function(err, result) {
-    console.log(err, result);
-  });
+// obs = obs.slice(1900, 2900);
+
+let canvas = new Canvas(980, 220);
+var graphDrawer = new GraphDrawer(980, 220, obs);
+
+graphDrawer.draw(canvas, 0, obs.length)
+canvas.toBuffer(function(err, buf) {
+  if (err == null) {
+    fs.writeFile("/Users/aduston/hr.png", buf);
+  }
+  console.log("done", err);
+});

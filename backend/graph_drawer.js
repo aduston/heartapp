@@ -53,7 +53,7 @@ function graphRect(outerRect) {
   return new Rect(
     outerRect.x + Constants.spaceLeft,
     outerRect.y + Constants.spaceTop,
-    outerRect.width - Constants.spaceLeft,
+    outerRect.width - Constants.spaceLeft * 2,
     outerRect.height - Constants.spaceBottom - Constants.spaceTop);
 };
 
@@ -90,23 +90,34 @@ class GraphDrawer {
   _drawHorizontalLines() {
     this._ctx.fillStyle = '#000';
     this._ctx.font = '12px Courier';
-    this._ctx.lineWidth = 1;
     for (var hr = Constants.minRate; hr <= Constants.maxRate; hr++) {
       if (hr % 5 != 0) {
         continue;
       }
-      var labeledLine = hr % 10 == 0;
+      var strokeStyle = '#aaa';
+      var lineWidth = 0.8;
+      if (hr % 20 == 0) {
+        strokeStyle = '#000';
+        lineWidth = 1.6;
+      } else if (hr % 10 == 0) {
+        strokeStyle = '#222';
+      }
       var y = this._params.yForHR(hr);
-      this._ctx.strokeStyle = labeledLine ? "#000" : "#666";
+      this._ctx.lineWidth = lineWidth;
+      this._ctx.strokeStyle = strokeStyle;
       this._ctx.beginPath();
       this._ctx.moveTo(this._params.graphRect.x, y);
       this._ctx.lineTo(this._params.graphRect.maxX, y);
       this._ctx.stroke();
-      if (labeledLine) {
+      if (hr % 10 == 0) {
         var te = this._ctx.measureText(hr + "");
         this._ctx.fillText(
           hr + "",
           this._params.graphRect.x - te.width - 2,
+          y + (te.actualBoundingBoxAscent / 2));
+        this._ctx.fillText(
+          hr + "",
+          this._params.graphRect.maxX + 2,
           y + (te.actualBoundingBoxAscent / 2));
       }
     }
@@ -122,29 +133,32 @@ class GraphDrawer {
   }
 
   _drawWideValues() {
+    let p = this._params;
     let labeledMultiple = this._findLabeledMultiple();
     this._ctx.fillStyle = Constants.regularFill;
-    let startObs = Math.max(0, Math.floor(this._params.startObs));
+    let startObs = Math.max(0, Math.floor(p.startObs));
     let endObs = Math.min(
       this._obs.length - 1,
-      Math.ceil(this._params.startObs + this._params.numObs));
-    var inHasHalved = false;
-    var curX = this._params.graphRect.x;
-    if (startObs < this._params.startObs) {
-      curX -= (this._params.barWidth * (this._params.startObs - startObs));
+      Math.ceil(p.startObs + p.numObs));
+    var curX = p.graphRect.x;
+    if (startObs < p.startObs) {
+      curX -= (p.barWidth * (p.startObs - startObs));
     }
     var lastLabelX = 0;
+    let firstSecond = this._obs[startObs].seconds;
+    var nextLabelSeconds = Math.ceil(firstSecond / labeledMultiple) * labeledMultiple;
     for (var i = startObs; i <= endObs; i++) {
       let obs = this._obs[i];
-      if (obs.halved != inHasHalved) {
-        this._ctx.fillStyle = obs.halved ? Constants.halvedFill : Constants.regularFill;
-        inHasHalved = obs.halved;
-      }
-      let y = this._params.yForHR(obs.heartRate);
-      let x = Math.max(this._params.graphRect.x, curX);
-      let nextX = Math.min(curX + this._params.barWidth, this._params.graphRect.maxX);
+      this._ctx.fillStyle = obs.halved ? Constants.halvedFill : Constants.regularFill;
+      let y = p.yForHR(obs.heartRate);
+      let x = Math.max(p.graphRect.x, curX);
+      let nextX = Math.min(curX + p.barWidth, p.graphRect.maxX);
       this._ctx.fillRect(
-        x, y, nextX - x, this._params.graphRect.maxY - y);
+        x, y, nextX - x, p.graphRect.maxY - y);
+      if (obs.seconds >= nextLabelSeconds && (lastLabelX == 0 || lastLabelX < x - Constants.xLabelWidth / 2.0)) {
+        lastLabelX = this._drawXLabel((x + nextX) / 2.0, nextLabelSeconds);
+        nextLabelSeconds += labeledMultiple;
+      }
       curX = nextX;
     }
   }
@@ -159,6 +173,8 @@ class GraphDrawer {
     var barIndex = p.startObs / obsPerBar;
     var x = obsStartX + barIndex * pixelsPerBar;
     var lastLabelX = 0;
+    let firstSecond = this._obs[Math.max(0, Math.min(p.startObs, this._obs.length - 1))].seconds;
+    var nextLabelSeconds = Math.ceil(firstSecond / labeledMultiple) * labeledMultiple;
     while (x < p.graphRect.maxX) {
       if (x + pixelsPerBar < p.graphRect.x) {
         continue;
@@ -170,8 +186,57 @@ class GraphDrawer {
       let fillStyle = summary.hasHalved ? Constants.halvedFill : Constants.regularFill;
       let lineX = this._drawGraphValueLine(x, minY, maxY, pixelsPerBar, strokeStyle);
       this._drawGraphValueLine(x, p.graphRect.maxY, maxY, pixelsPerBar, fillStyle);
+      if (lastLabelX == 0 || lastLabelX < x - Constants.xLabelWidth / 2.0) {
+        let newLabelX = this._maybeDrawXLabel(summary, nextLabelSeconds, lineX);
+        if (newLabelX != 0) {
+          lastLabelX = newLabelX;
+          nextLabelSeconds += labeledMultiple;
+        }
+      }
       barIndex += 1;
       x = obsStartX + barIndex * pixelsPerBar;
+    }
+  }
+
+  _maybeDrawXLabel(summary, nextLabelSeconds, lineX) {
+    for (var seconds = summary.minSeconds; seconds <= summary.maxSeconds; seconds++) {
+      if (seconds >= nextLabelSeconds) {
+        return this._drawXLabel(lineX, nextLabelSeconds);
+      }
+    }
+    return 0.0;
+  }
+
+  _drawXLabel(midX, seconds) {
+    this._ctx.lineWidth = 1;
+    this._ctx.strokeStyle = '#000';
+    this._ctx.beginPath();
+    this._ctx.moveTo(midX, this._params.graphRect.maxY);
+    this._ctx.lineTo(midX, this._params.graphRect.maxY + 5);
+    this._ctx.stroke();
+    let label = this._timeLabelText(seconds);
+    var te = this._ctx.measureText(label);
+    this._ctx.fillStyle = '#000';
+    this._ctx.fillText(
+      label,
+      midX - te.width / 2.0,
+      this._params.graphRect.maxY + te.actualBoundingBoxAscent + 7);
+    return midX + te.width / 2.0;
+  }
+
+  _timeLabelText(seconds) {
+    function pad(num) {
+      var num = num + '';
+      return num.length == 1 ? ('0' + num) : num;
+    }
+    if (seconds < 60) {
+      return '0:' + pad(seconds);
+    } else if (seconds < 3600) {
+      return Math.floor(seconds / 60) + ':' + pad(seconds % 60, 2);
+    } else {
+      return Math.floor(seconds / 3600) + ':' +
+        pad(Math.floor((seconds % 3600) / 60), 2) + ':' +
+        pad(seconds % 60, 2);
     }
   }
 
