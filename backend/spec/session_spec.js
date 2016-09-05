@@ -16,4 +16,25 @@ describe("session", function() {
     expect(obsArray[0].seconds).toEqual(0);
     expect(obsArray[0].heartRate).toEqual(83);
   });
+
+  it("Does gets seconds right when halved", function() {
+    let b64text = fs.readFileSync(__dirname + "/heartdata.txt", { encoding: 'ascii'});
+    let buf = new Buffer(b64text, 'base64');
+    let obs = session.convertToObjArray(buf);
+    expect(obs.length).toEqual(9962);
+    expect(obs[2142].halved).toEqual(true);
+    expect(obs[2142].seconds).toEqual(2142);
+  });
+
+  it("Computes stats", function() {
+    let b64text = fs.readFileSync(__dirname + "/heartdata.txt", { encoding: 'ascii'});
+    let buf = new Buffer(b64text, 'base64');
+    let obs = session.convertToObjArray(buf);
+    let stats = session.computeStats(obs);
+    expect(stats.numThreshold).toEqual(89);
+    expect(stats.meanThreshold).toEqual(119);
+    expect(stats.minThreshold).toEqual(89);
+    expect(stats.maxThreshold).toEqual(135);
+    expect(stats.duration).toEqual(9961);
+  });
 });

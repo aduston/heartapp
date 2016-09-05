@@ -5,15 +5,17 @@ var async = require('async');
 var session = require('./session');
 var storage = require('./storage');
 var GraphDrawer = require('./graph_drawer');
+var util = require('./util');
 var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
-let VERSION = 2;
-let IMAGE_WIDTH = 1200;
-let IMAGE_HEIGHT = 300;
+let VERSION = 4;
+let IMAGE_WIDTH = 980;
+let IMAGE_HEIGHT = 220;
 // iOS reports timestamp in seconds since 1/1/2001.
 let TIMESTAMP_OFFSET = 978307200;
+let TIMEZONE = "America/New_York";
 
 exports.TIMESTAMP_OFFSET = TIMESTAMP_OFFSET;
 exports.VERSION = VERSION;
@@ -73,6 +75,28 @@ function refreshItem(sessionTimestamp, itemFn, callback) {
   ], callback);
 }
 
+function updateItemFull(fullItem, callback) {
+  async.waterfall([
+    function(callback) {
+      updateItemRecord(fullItem, callback);
+    },
+    function(fullItem, callback) {
+      updateItemImageAndHTML(fullItem, callback);
+    }
+  ], callback);
+}
+
+function updateItemRecord(fullItem, callback) {
+  fullItem = makeItem(fullItem.SessionTimestamp, fullItem.Observations);
+  saveRecord(fullItem, function(err, result) {
+    if (err != null) {
+      callback(err, result);
+    } else {
+      callback(null, fullItem);
+    }
+  });
+}
+
 function updateItemImageAndHTML(fullItem, callback) {
   async.parallel([
     function(callback) { saveImage(fullItem.SessionTimestamp, fullItem.Observations, callback); },
@@ -86,7 +110,8 @@ function fetchFullItem(timestamp, callback) {
     Key: {
       SessionShard: 0,
       SessionTimestamp: timestamp
-    }
+    },
+    ConsistentRead: true
   }, function(err, result) {
     if (err != null) {
       callback(err, result);
@@ -126,12 +151,22 @@ function saveNewSession(data, callback) {
 }
 
 function makeItem(timestamp, observations) {
-  return {
-    "SessionShard": 0,
-    "SessionTimestamp": timestamp,
-    "Observations": observations,
-    "Version": VERSION
-  };
+  let obs = session.convertToObjArray(observations);
+  let stats = session.computeStats(obs);
+  var item = {
+    SessionShard: 0,
+    SessionTimestamp: timestamp,
+    Observations: observations,
+    Version: VERSION,
+    SessionDuration: stats.duration,
+    NumThreshold: stats.numThreshold
+  }
+  if (stats.numThreshold > 0) {
+    item.MeanThreshold = stats.meanThreshold;
+    item.MinThreshold = stats.minThreshold;
+    item.MaxThreshold =  stats.maxThreshold;
+  }
+  return item;
 }
 
 function saveRecord(item, callback) {
@@ -175,14 +210,15 @@ function updateHTML(item, callback) {
 }
 
 function updateSessionHTML(item, callback) {
-  var formattedTimestamp = moment.unix(item.SessionTimestamp).format('MMMM Do YYYY, h:mm:ss a');
+  var formattedTimestamp = moment.unix(item.SessionTimestamp).tz(TIMEZONE).format('MMMM Do YYYY, h:mm:ss a');
   var title = "Adam&apos;s Heart: " + formattedTimestamp;
   var html = new StringBuilder();
   html.append('<!doctype html><html lang="en">' +
               '<head><meta charset="utf-8"><title>' + title + '</title></head>' +
               '<body>');
+  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
   writeResultToHTML(html, item);
-  html.append("<script>var timestamp = " + item.SessionTimestamp + ";</script></body></html>");
+  html.append("</div><script>var timestamp = " + item.SessionTimestamp + ";</script></body></html>");
   async.waterfall([
     function(callback) {
       html.build(callback);
@@ -213,17 +249,24 @@ function updateIndexHTML(item, callback) {
 
 function updateHTMLWithResults(results, callback) {
   var resultsJson = JSON.stringify(results.map(function(result) {
-    return result.SessionTimestamp + "." + result.Version;
+    var resultArr = [
+      `${result.SessionTimestamp}.${result.Version}`,
+      result.SessionDuration, result.NumThreshold];
+    if (result.NumThreshold > 10) {
+      Array.prototype.push.apply(resultArr, [result.MeanThreshold, result.MinThreshold, result.MaxThreshold]);
+    }
+    return resultArr;
   }));
   var html = new StringBuilder();
   html.append('<!doctype html><html lang="en">' +
               '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>' +
               '<body>');
+  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
   var numResultsToWrite = Math.min(10, results.length);
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i]);
   }
-  html.append("<script>var timestamps = ");
+  html.append("</div><script>var timestamps = ");
   html.append(resultsJson);
   html.append(';</script></body></html>');
   async.waterfall([
@@ -240,10 +283,23 @@ function updateHTMLWithResults(results, callback) {
 }
 
 function writeResultToHTML(html, result) {
-  html.append('<div id="session-' + result.SessionTimestamp  + '"><img src="' +
+  html.append(`<div id="session-${result.SessionTimestamp}">`);
+  html.append(`<a href="/${result.SessionTimestamp}">` +
+              shortFormatTimestamp(result.SessionTimestamp) +
+              '</a><br/>');
+  html.append(`<span>duration ${util.formatTime(result.SessionDuration)}</span><br/>`);
+  if (result.NumThreshold > 10) {
+    html.append(`<span>mean ${result.MeanThreshold} / min ${result.MinThreshold} / max ${result.MaxThreshold} / count ${result.NumThreshold}</span><br/>`);
+  }
+  html.append('<img src="' +
               result.SessionTimestamp + '.' +
               result['Version'] + '.png" width="' + IMAGE_WIDTH +
-              '" height="' + IMAGE_HEIGHT + '"></img></div>');
+              '" height="' + IMAGE_HEIGHT + '"></img>');
+  html.append('</div>');
+}
+
+function shortFormatTimestamp(timestamp) {
+  return moment.unix(timestamp).tz(TIMEZONE).format('M/D/YYYY h:mm a');
 }
 
 function runQuery(callback) {
@@ -257,8 +313,8 @@ function runQuery(callback) {
         if (results.Items.length > 0) {
           allResults.push.apply(allResults, results.Items);
         }
-        if (results.lastEvaluatedKey) {
-          query(results.lastEvaluatedKey);
+        if (results.LastEvaluatedKey) {
+          query(results.LastEvaluatedKey);
         } else {
           callback(null, allResults);
         }
@@ -275,7 +331,7 @@ function runRawQuery(lastEvaluatedKey, callback) {
     ExpressionAttributeValues: {
       ':zero': 0
     },
-    ProjectionExpression: 'SessionTimestamp,Version',
+    ProjectionExpression: 'SessionTimestamp,Version,SessionDuration,NumThreshold,MaxThreshold,MeanThreshold,MinThreshold',
     ScanIndexForward: false,
     Select: 'SPECIFIC_ATTRIBUTES'
   };

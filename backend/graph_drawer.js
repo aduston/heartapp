@@ -1,5 +1,7 @@
 'use strict'
 
+var util = require('./util');
+
 let Constants = {
   xLabelWidth: 60,
   minRate: 35,
@@ -214,7 +216,7 @@ class GraphDrawer {
     this._ctx.moveTo(midX, this._params.graphRect.maxY);
     this._ctx.lineTo(midX, this._params.graphRect.maxY + 5);
     this._ctx.stroke();
-    let label = this._timeLabelText(seconds);
+    let label = util.formatTime(seconds);
     var te = this._ctx.measureText(label);
     this._ctx.fillStyle = '#000';
     this._ctx.fillText(
@@ -222,22 +224,6 @@ class GraphDrawer {
       midX - te.width / 2.0,
       this._params.graphRect.maxY + te.actualBoundingBoxAscent + 7);
     return midX + te.width / 2.0;
-  }
-
-  _timeLabelText(seconds) {
-    function pad(num) {
-      var num = num + '';
-      return num.length == 1 ? ('0' + num) : num;
-    }
-    if (seconds < 60) {
-      return '0:' + pad(seconds);
-    } else if (seconds < 3600) {
-      return Math.floor(seconds / 60) + ':' + pad(seconds % 60, 2);
-    } else {
-      return Math.floor(seconds / 3600) + ':' +
-        pad(Math.floor((seconds % 3600) / 60), 2) + ':' +
-        pad(seconds % 60, 2);
-    }
   }
 
   _drawGraphValueLine(x, y0, y1, width, style) {
