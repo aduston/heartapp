@@ -10,7 +10,10 @@ var Canvas = require('canvas');
 var StringBuilder = require('stringbuilder');
 var moment = require('moment-timezone');
 
-let VERSION = 4;
+let IMAGE_VERSION = 5;
+let HTML_VERSION = 1;
+let JSON_VERSION = 1;
+
 let IMAGE_WIDTH = 980;
 let IMAGE_HEIGHT = 220;
 // iOS reports timestamp in seconds since 1/1/2001.
@@ -18,7 +21,9 @@ let TIMESTAMP_OFFSET = 978307200;
 let TIMEZONE = "America/New_York";
 
 exports.TIMESTAMP_OFFSET = TIMESTAMP_OFFSET;
-exports.VERSION = VERSION;
+exports.IMAGE_VERSION = IMAGE_VERSION;
+exports.HTML_VERSION = HTML_VERSION;
+exports.JSON_VERSION = JSON_VERSION;
 
 exports.handler = function(event, context, callback) {
   console.log('Received event:', JSON.stringify(event, null, 2));
@@ -52,7 +57,7 @@ function refreshItems(itemFn, callback) {
       function(sessions, callback) {
         var callables = [];
         for (var i = 0; i < sessions.length; i++) {
-          if (sessions[i].Version < VERSION) {
+          if (anyVersionBehind(sessions[i])) {
             callables.push(function(session) {
               return function(callback) { refreshItem(session.SessionTimestamp, itemFn, callback); };
             }(sessions[i]));
@@ -61,6 +66,12 @@ function refreshItems(itemFn, callback) {
         async.parallel(callables, callback);
       }
     ], callback);
+}
+
+function anyVersionBehind(session) {
+  return (session.ImageVersion || 0) < IMAGE_VERSION ||
+    (session.HtmlVersion || 0) < HTML_VERSION ||
+    (session.JsonVersion || 0) < JSON_VERSION;
 }
 
 function refreshItem(sessionTimestamp, itemFn, callback) {
@@ -99,8 +110,20 @@ function updateItemRecord(fullItem, callback) {
 
 function updateItemImageAndHTML(fullItem, callback) {
   async.parallel([
-    function(callback) { saveImage(fullItem.SessionTimestamp, fullItem.Observations, callback); },
-    function(callback) { updateSessionHTML(fullItem, callback); }
+    function(callback) {
+      if ((fullItem.ImageVersion || 0) < IMAGE_VERSION) {
+        saveImage(fullItem.SessionTimestamp, fullItem.Observations, callback);
+      } else {
+        callback();
+      }
+    },
+    function(callback) {
+      if ((fullItem.HtmlVersion || 0) < HTML_VERSION) {
+        updateSessionHTML(fullItem, callback);
+      } else {
+        callback();
+      }
+    }
   ], callback);
 }
 
@@ -157,7 +180,9 @@ function makeItem(timestamp, observations) {
     SessionShard: 0,
     SessionTimestamp: timestamp,
     Observations: observations,
-    Version: VERSION,
+    ImageVersion: IMAGE_VERSION,
+    HtmlVersion: HTML_VERSION,
+    JsonVersion: JSON_VERSION,
     SessionDuration: stats.duration,
     NumThreshold: stats.numThreshold
   }
@@ -178,7 +203,7 @@ function saveRecord(item, callback) {
 }
 
 function saveImage(timestamp, observations, callback) {
-  let fileName = timestamp + "." + VERSION + ".png";
+  let fileName = `${timestamp}.${IMAGE_VERSION}.png`;
   var objArray = session.convertToObjArray(observations);
   var graphDrawer = new GraphDrawer(IMAGE_WIDTH, IMAGE_HEIGHT, objArray);
   let canvas = new Canvas(IMAGE_WIDTH, IMAGE_HEIGHT);
@@ -188,7 +213,7 @@ function saveImage(timestamp, observations, callback) {
       canvas.toBuffer(callback);
     },
     function(buffer, callback) {
-      storage.saveObject(fileName, buffer, "image/png", callback);
+      storage.saveObject(fileName, buffer, "image/png", true, callback);
     }
   ], callback);
 }
@@ -199,7 +224,7 @@ function saveDataToJSON(timestamp, observations, callback) {
     function(obs) {
       return [obs.seconds, (obs.halved ? 1 : 0), obs.heartRate];
     }));
-  storage.saveObject(fileName, json, "text/plain", callback);
+  storage.saveObject(fileName, json, "text/plain", false, callback);
 }
 
 function updateHTML(item, callback) {
@@ -224,7 +249,7 @@ function updateSessionHTML(item, callback) {
       html.build(callback);
     },
     function(result, callback) {
-      storage.saveObject("" + item.SessionTimestamp, result, "text/html", callback);
+      storage.saveObject("" + item.SessionTimestamp, result, "text/html", false, callback);
     },
     function(result, callback) {
       storage.invalidatePath("/" + item.SessionTimestamp, callback);
@@ -248,21 +273,22 @@ function updateIndexHTML(item, callback) {
 }
 
 function updateHTMLWithResults(results, callback) {
-  var resultsJson = JSON.stringify(results.map(function(result) {
-    var resultArr = [
-      `${result.SessionTimestamp}.${result.Version}`,
-      result.SessionDuration, result.NumThreshold];
-    if (result.NumThreshold > 10) {
-      Array.prototype.push.apply(resultArr, [result.MeanThreshold, result.MinThreshold, result.MaxThreshold]);
-    }
-    return resultArr;
-  }));
+  var numResultsToWrite = Math.min(10, results.length);
+  var resultsJson = JSON.stringify(results.slice(numResultsToWrite).map(
+    function(result) {
+      var resultArr = [
+        result.SessionTimestamp, result.Version,
+        result.SessionDuration, result.NumThreshold];
+      if (result.NumThreshold > 10) {
+        Array.prototype.push.apply(resultArr, [result.MeanThreshold, result.MinThreshold, result.MaxThreshold]);
+      }
+      return resultArr;
+    }));
   var html = new StringBuilder();
   html.append('<!doctype html><html lang="en">' +
               '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>' +
               '<body>');
   html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
-  var numResultsToWrite = Math.min(10, results.length);
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i]);
   }
@@ -274,7 +300,7 @@ function updateHTMLWithResults(results, callback) {
       html.build(callback);
     },
     function(result, callback) {
-      storage.saveObject("index.html", result, "text/html", callback);
+      storage.saveObject("index.html", result, "text/html", false, callback);
     },
     function(result, callback) {
       storage.invalidatePath('/index.html', callback);
@@ -331,7 +357,7 @@ function runRawQuery(lastEvaluatedKey, callback) {
     ExpressionAttributeValues: {
       ':zero': 0
     },
-    ProjectionExpression: 'SessionTimestamp,Version,SessionDuration,NumThreshold,MaxThreshold,MeanThreshold,MinThreshold',
+    ProjectionExpression: 'SessionTimestamp,ImageVersion,HtmlVersion,JsonVersion,SessionDuration,NumThreshold,MaxThreshold,MeanThreshold,MinThreshold',
     ScanIndexForward: false,
     Select: 'SPECIFIC_ATTRIBUTES'
   };
@@ -345,9 +371,11 @@ function updateItemVersion(timestamp, callback) {
   let params = {
     TableName: "HeartSessions",
     Key: { SessionShard: 0, SessionTimestamp: timestamp },
-    UpdateExpression: "set Version = :version",
+    UpdateExpression: "set ImageVersion = :image_version, HtmlVersion = :html_version, JsonVersion = :json_version",
     ExpressionAttributeValues: {
-      ':version': VERSION
+      ':image_version': IMAGE_VERSION,
+      ':html_version': HTML_VERSION,
+      ':json_version': JSON_VERSION
     }
   };
   storage.getDDB().update(params, callback);

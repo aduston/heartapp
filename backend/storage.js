@@ -34,7 +34,7 @@ exports.initForTesting = function(callback) {
  *
  * Body can be text or a buffer.
  */
-exports.saveObject = function(key, body, contentType, callback) {
+exports.saveObject = function(key, body, contentType, neverExpires, callback) {
   if (testingStorageObj != null) {
     testingStorageObj.savedObjects.push({ key: key, body: body, contentType: contentType });
     callback(null, "okay");
@@ -46,6 +46,10 @@ exports.saveObject = function(key, body, contentType, callback) {
       Body: body,
       ContentType: contentType
     };
+    if (neverExpires) {
+      // use with caution, locks in
+      params.CacheControl = "max-age=31536000, public";
+    }
     s3.putObject(params, callback);
   }
 };

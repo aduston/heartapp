@@ -104,25 +104,28 @@ describe("session_responder", function() {
   });
 
   describe("refresh operation", function() {
-    function insertCallable(timestamp, version) {
+    function insertCallable(timestamp, imageVersion, htmlVersion) {
       var observations = new Buffer('AAAAUwAAAFYAAAFZAAACXA==', 'base64');
       return function(callback) {
         var item = {
           "SessionShard": 0,
           "SessionTimestamp": timestamp + sessionResponder.TIMESTAMP_OFFSET,
           "Observations": observations,
-          "Version": version
+          "HtmlVersion": htmlVersion,
+          "ImageVersion": imageVersion,
+          "JsonVersion": sessionResponder.JSON_VERSION
         };
         storage.getDDB().put({ TableName: "HeartSessions", Item: item }, callback);
       };
     }
     
     beforeEach(function(done) {
-      var version = sessionResponder.VERSION;
+      var imageVersion = sessionResponder.IMAGE_VERSION;
+      var htmlVersion = sessionResponder.HTML_VERSION;
       async.parallel([
-        insertCallable(1, version - 1),
-        insertCallable(2, version),
-        insertCallable(3, version - 1)
+        insertCallable(1, imageVersion - 1, htmlVersion),
+        insertCallable(2, imageVersion, htmlVersion),
+        insertCallable(3, imageVersion, htmlVersion - 1)
       ], done);
     });
 
@@ -134,7 +137,7 @@ describe("session_responder", function() {
         function(err, result) {
           expect(err).toBeNull();
           var htmls = storageObj.savedObjects.filter(function(o) { return o.contentType == "text/html" });
-          expect(htmls.length).toEqual(3);
+          expect(htmls.length).toEqual(2);
           done();
         });
     });
@@ -147,7 +150,7 @@ describe("session_responder", function() {
         function(err, result) {
           expect(err).toBeNull();
           var images = storageObj.savedObjects.filter(function(o) { return o.contentType == "image/png" });
-          expect(images.length).toEqual(2);
+          expect(images.length).toEqual(1);
           done();
         });
     });
@@ -163,7 +166,7 @@ describe("session_responder", function() {
               ExpressionAttributeValues: {
                 ':zero': 0
               },
-              ProjectionExpression: 'SessionTimestamp,Version',
+              ProjectionExpression: 'SessionTimestamp,ImageVersion,HtmlVersion,JsonVersion',
               ScanIndexForward: false,
               Select: 'SPECIFIC_ATTRIBUTES'
             };
@@ -173,7 +176,9 @@ describe("session_responder", function() {
         function(err, result) {
           var items = result.Items;
           for (var i = 0; i < items.length; i++) {
-            expect(items[i].Version).toEqual(sessionResponder.VERSION);
+            expect(items[i].ImageVersion).toEqual(sessionResponder.IMAGE_VERSION);
+            expect(items[i].HtmlVersion).toEqual(sessionResponder.HTML_VERSION);
+            expect(items[i].JsonVersion).toEqual(sessionResponder.JSON_VERSION);
           }
           done();
         });
