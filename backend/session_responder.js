@@ -11,7 +11,7 @@ var StringBuilder = require('stringbuilder');
 var moment = require('moment-timezone');
 
 let IMAGE_VERSION = 5;
-let HTML_VERSION = 1;
+let HTML_VERSION = 2;
 let JSON_VERSION = 1;
 
 let IMAGE_WIDTH = 980;
@@ -277,7 +277,7 @@ function updateHTMLWithResults(results, callback) {
   var resultsJson = JSON.stringify(results.slice(numResultsToWrite).map(
     function(result) {
       var resultArr = [
-        result.SessionTimestamp, result.Version,
+        result.SessionTimestamp, result.ImageVersion,
         result.SessionDuration, result.NumThreshold];
       if (result.NumThreshold > 10) {
         Array.prototype.push.apply(resultArr, [result.MeanThreshold, result.MinThreshold, result.MaxThreshold]);
@@ -319,7 +319,7 @@ function writeResultToHTML(html, result) {
   }
   html.append('<img src="' +
               result.SessionTimestamp + '.' +
-              result['Version'] + '.png" width="' + IMAGE_WIDTH +
+              IMAGE_VERSION + '.png" width="' + IMAGE_WIDTH +
               '" height="' + IMAGE_HEIGHT + '"></img>');
   html.append('</div>');
 }
