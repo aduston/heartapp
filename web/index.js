@@ -66,7 +66,6 @@ function needsMoreSessions() {
 
 function onScroll(e) {
   if (SessionData.anyMissingFromDOM() && needsMoreSessions()) {
-    console.log('needs more!');
     var numToAdd = Math.min(SessionData.PAGE_SIZE, SessionData.all.length - SessionData.numInDOM);
     for (var i = SessionData.numInDOM; i < SessionData.numInDOM + numToAdd; i++) {
       var sessionData = SessionData.all[i];
