@@ -22,11 +22,20 @@ function load() {
   if (data == null || !jqueryLoaded) {
     return;
   }
+  var startObs = 0;
+  try {
+    startObs = parseInt(document.location.hash.substring(1));
+  } catch (e) {}
+  if (isNaN(startObs)) startObs = 0;
+  startObs = Math.max(0, Math.min(data.length - NUM_OBS, startObs));
   var magnifierWidth = (NUM_OBS / data.length) * IMG_WIDTH;
   var $magnifier = $('<div>').attr('id', 'magnifier').css('width', magnifierWidth);
+  $('#session').prepend($magnifier);
+  if (startObs != 0) {
+    $magnifier.css('left', MARGIN + startObs * (IMG_WIDTH / data.length));
+  }
   var imageLeft = null;
   var draggingPos = null;
-  $('#session').prepend($magnifier);
   var magnifierTop = $magnifier.offset().top;
   $magnifier.on('mousedown', function(e) {
     imageLeft = $('#session img').offset().left;
@@ -49,7 +58,7 @@ function load() {
   $(document.body).on('mouseup', function(e) {
     draggingPos = null;
   });
-  updateMag(0);
+  updateMag(startObs);
 }
 
 function MagPanel(startObs) {
@@ -107,8 +116,9 @@ function addMag(startObs) {
 }
 
 function updateMag(startObs) {
+  document.location.hash = startObs + '';
   if (magPanels.length == 0) {
-    addMag(startObs);
+    addMag(startObs - (startObs % NUM_OBS));
   }
   if (magPanels.length < 2 && startObs != magPanels[0].startObs) {
     addMag(magPanels[0].startObs + NUM_OBS);
