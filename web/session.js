@@ -65,7 +65,7 @@ function MagPanel(startObs) {
   this.$div = $('<div>').addClass('mag-panel');
   this.bars = []
   for (var i = 0; i < NUM_OBS; i++) {
-    var $bar = $('<div>').addClass('mag-bar');
+    var $bar = $('<div>').addClass('mag-bar').css('left', i * 2);
     this.bars.push($bar);
     this.$div.append($bar);
   }
