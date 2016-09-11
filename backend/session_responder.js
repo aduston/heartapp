@@ -288,13 +288,17 @@ function updateHTMLWithResults(results, callback) {
   html.append('<!doctype html><html lang="en">' +
               '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>' +
               '<body>');
-  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
+  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px"><div id="sessions">`);
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i]);
   }
-  html.append("</div><script>var timestamps = ");
-  html.append(resultsJson);
-  html.append(';</script></body></html>');
+  html.append('</div><div id="more-sessions">Loading...</div></div>');
+  html.append(`<script>var sessions = ${resultsJson};</script>`);
+  html.append(scriptSrcTag('jquery.3.1.0.min.js'));
+  html.append(scriptSrcTag('moment.2.14.1.min.js'));
+  html.append(scriptSrcTag('momenttz.0.5.5.min.js'));
+  html.append(scriptSrcTag('index.min.js'));
+  html.append("</body></html>");
   async.waterfall([
     function(callback) {
       html.build(callback);
@@ -308,6 +312,10 @@ function updateHTMLWithResults(results, callback) {
   ], callback);
 }
 
+function scriptSrcTag(script) {
+  return `<script src=/${script}></script>`;
+}
+
 function writeResultToHTML(html, result) {
   html.append(`<div id="session-${result.SessionTimestamp}">`);
   html.append(`<a href="/${result.SessionTimestamp}">` +
@@ -317,10 +325,12 @@ function writeResultToHTML(html, result) {
   if (result.NumThreshold > 10) {
     html.append(`<span>mean ${result.MeanThreshold} / min ${result.MinThreshold} / max ${result.MaxThreshold} / count ${result.NumThreshold}</span><br/>`);
   }
+  html.append(`<a href="/${result.SessionTimestamp}">`);
   html.append('<img src="' +
               result.SessionTimestamp + '.' +
               IMAGE_VERSION + '.png" width="' + IMAGE_WIDTH +
               '" height="' + IMAGE_HEIGHT + '"></img>');
+  html.append('</a>');
   html.append('</div>');
 }
 

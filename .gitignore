@@ -33,3 +33,4 @@ canvasdeps
 .DS_Store
 
 testservice.sh
+web/external/*.js
