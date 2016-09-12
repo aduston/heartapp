@@ -21,29 +21,49 @@ def deploy_external():
     for f in os.listdir(external_dir):
         full_name = os.path.join(external_dir, f)
         with open(full_name, 'r') as f_in:
-            write_js(f_in, f, True)
+            write_asset(f_in, f, 'text/javascript; charset=UTF-8', True)
 
-def deploy_index():
+def deploy_js(name):
+    raw_name = "{0}.js".format(name)
+    min_name = "{0}.min.js".format(name)
     web_dir = os.path.dirname(os.path.realpath(__file__))
-    index_file = os.path.join(web_dir, 'index.js')
-    process = Popen(['uglifyjs', index_file], stdout=PIPE)
+    js_file = os.path.join(web_dir, raw_name)
+    process = Popen(['uglifyjs', js_file], stdout=PIPE)
     (output, err) = process.communicate()
     exit_code = process.wait()
     if exit_code != 0:
         print("UglifyJS gave exit code of {0}".format(exit_code))
         exit(exit_code)
-    write_js(StringIO.StringIO(output), 'index.min.js', False)
+    write_asset(StringIO.StringIO(output), min_name, 'text/javascript; charset=UTF-8', False)
+    invalidate('/{0}'.format(min_name));
+
+def deploy_css(name):
+    name = '{0}.css'.format(name)
+    web_dir = os.path.dirname(os.path.realpath(__file__))
+    css_file = os.path.join(web_dir, name)
+    with open(css_file, 'r') as f_in:
+        write_asset(f_in, name, 'text/css; charset=UTF-8', False)
+    invalidate('/{0}'.format(name))
+
+def deploy_img(img_name):
+    web_dir = os.path.dirname(os.path.realpath(__file__))
+    img_file = os.path.join(web_dir, img_name)
+    with open(img_file, 'r') as f_in:
+        write_asset(f_in, img_name, 'image/png', True)
+    invalidate('/{0}'.format(img_name))
+
+def invalidate(path):
     cloudfront_client.create_invalidation(
         DistributionId=CLOUDFRONT_ID,
         InvalidationBatch={
-            'CallerReference': str(int(time.time())),
+            'CallerReference': str(int(time.time())) + path,
             'Paths': {
                 'Quantity': 1,
-                'Items': ['/index.min.js']
+                'Items': [path]
             }
         })
 
-def write_js(f_in, name, cache_forever):
+def write_asset(f_in, name, content_type, cache_forever):
     gzipped = StringIO.StringIO()
     with gzip.GzipFile(fileobj=gzipped, mode='w') as f_out:
         shutil.copyfileobj(f_in, f_out)
@@ -54,7 +74,7 @@ def write_js(f_in, name, cache_forever):
         Body=gzipped_bytes,
         Bucket=S3_BUCKET,
         Key=name,
-        ContentType='text/javascript; charset=UTF-8',
+        ContentType=content_type,
         ContentEncoding="gzip",
         ContentLength=len(gzipped_bytes))
     if cache_forever:
@@ -63,7 +83,10 @@ def write_js(f_in, name, cache_forever):
 
 def deploy():
     deploy_external()
-    deploy_index()
+    deploy_js('index')
+    deploy_js('session')
+    deploy_css('session')
+    deploy_img('lines.0.png')
 
 if __name__ == '__main__':
     deploy()

@@ -8,28 +8,40 @@
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    user-drag: none;
+    -webkit-user-drag: none;
 }
 #magnifier {
     position: absolute;
     left: 30px;
-    top: -20px;
-    height: 260px;
+    top: 0px;
+    height: 220px;
     background-color: rgba(0, 0, 0, 0.2);
     border: 1px solid black;
+}
+#magnified-container {
+    padding: 0 30px;
+    background: url('/lines.0.png') white no-repeat;
 }
 #magnified {
     position: relative;
     overflow: hidden;
-    height: 300px;
+    height: 325px;
 }
 .mag-panel {
     position: absolute;
     width: 980px;
-    height: 300px;
+    height: 325px;
 }
 .mag-bar {
     width: 2px;
-    background-color: rgba(0, 0, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.6);
+    position: absolute;
+    bottom: 25px;
+}
+.time {
     position: absolute;
     bottom: 0px;
+    width: 80px;
+    text-align: center;
 }

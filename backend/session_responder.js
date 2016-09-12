@@ -11,7 +11,7 @@ var StringBuilder = require('stringbuilder');
 var moment = require('moment-timezone');
 
 let IMAGE_VERSION = 5;
-let HTML_VERSION = 3;
+let HTML_VERSION = 4;
 let JSON_VERSION = 1;
 
 let IMAGE_WIDTH = 980;

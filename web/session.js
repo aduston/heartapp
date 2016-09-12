@@ -1,7 +1,10 @@
 MAG_HEIGHT = 300;
 IMG_WIDTH = 920;
 MARGIN = 30;
-MAG_WIDTH = (IMG_WIDTH + MARGIN * 2);
+MAX_HR = 175;
+MIN_HR = 35;
+TIME_INTERVAL = 60;
+MAG_WIDTH = IMG_WIDTH;
 NUM_OBS = MAG_WIDTH / 2;
 
 var jqueryLoaded = false;
@@ -77,11 +80,49 @@ MagPanel.prototype.setStartObs = function(startObs) {
     return;
   }
   this.startObs = startObs;
+  this.$div.find('.time').remove();
   var endObs = Math.min(startObs + NUM_OBS, data.length) - startObs;
+  var nextTime = this.determineLabelTime(startObs);
   for (var i = 0; i < endObs; i++) {
     var obs = data[startObs + i];
-    var height = (MAG_HEIGHT / 140) * (obs[2] - 35);
+    var height = (MAG_HEIGHT / (MAX_HR - MIN_HR)) * (obs[2] - MIN_HR);
     this.bars[i].height(Math.max(0, Math.min(MAG_HEIGHT, height)));
+    if (obs[0] >= nextTime) {
+      this.addTimeLabel(nextTime, i);
+      nextTime += TIME_INTERVAL;
+    }
+  }
+};
+
+MagPanel.prototype.addTimeLabel = function(time, index) {
+  var labelText = this.formattedDuration(time);
+  this.$div.append($('<div>').addClass('time').css('left', index * 2 - 40).text(labelText));
+};
+
+MagPanel.prototype.formattedDuration = function(time) {
+  function pad(num) {
+    var num = num + '';
+    return num.length == 1 ? ('0' + num) : num;
+  }
+  if (time < 60) {
+    return '0:' + pad(time);
+  } else if (time < 3600) {
+    return Math.floor(time / 60) + ':' + pad(time % 60, 2);
+  } else {
+    return Math.floor(time / 3600) + ':' +
+      pad(Math.floor((time % 3600) / 60), 2) + ':' +
+      pad(time % 60, 2);
+  }
+};
+
+MagPanel.prototype.determineLabelTime = function(index) {
+  var startIndex = Math.max(0, index - 3);
+  var time = data[startIndex][0];
+  var mark = TIME_INTERVAL * Math.ceil(time / TIME_INTERVAL);
+  if (index == 0 || data[index - 1][0] < mark) {
+    return mark;
+  } else {
+    return mark + TIME_INTERVAL;
   }
 };
 
@@ -125,7 +166,7 @@ function updateMag(startObs) {
   }
   var indexWithIntersection = findPanelWithIntersection(startObs);
   if (indexWithIntersection == -1) {
-    magPanels[0].setStartObs(startObs);
+    magPanels[0].setStartObs(startObs - (startObs % NUM_OBS));
     magPanels[0].makeFirst();
     magPanels[0].setLeftPos(startObs);
   } else {

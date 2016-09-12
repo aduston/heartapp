@@ -35,7 +35,6 @@ SessionData.prototype.formattedDuration = function() {
       pad(Math.floor((this.duration % 3600) / 60), 2) + ':' +
       pad(this.duration % 60, 2);
   }
-
 };
 
 SessionData.prototype.imageURL = function() {

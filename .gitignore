@@ -34,3 +34,4 @@ canvasdeps
 
 testservice.sh
 web/external/*.js
+web/*.json
