@@ -11,7 +11,7 @@ var StringBuilder = require('stringbuilder');
 var moment = require('moment-timezone');
 
 let IMAGE_VERSION = 5;
-let HTML_VERSION = 2;
+let HTML_VERSION = 3;
 let JSON_VERSION = 1;
 
 let IMAGE_WIDTH = 980;
@@ -238,12 +238,19 @@ function updateSessionHTML(item, callback) {
   var formattedTimestamp = moment.unix(item.SessionTimestamp).tz(TIMEZONE).format('MMMM Do YYYY, h:mm:ss a');
   var title = "Adam&apos;s Heart: " + formattedTimestamp;
   var html = new StringBuilder();
-  html.append('<!doctype html><html lang="en">' +
-              '<head><meta charset="utf-8"><title>' + title + '</title></head>' +
-              '<body>');
+  html.append('<!doctype html><html lang="en">');
+  html.append('<head><meta charset="utf-8"/>');
+  html.append(`<title>${title}</title>`);
+  html.append('<link type="text/css" rel="stylesheet" href="/session.css"></link>');
+  html.append('</head>');
+  html.append('<body>');
   html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
-  writeResultToHTML(html, item);
-  html.append("</div><script>var timestamp = " + item.SessionTimestamp + ";</script></body></html>");
+  writeResultToHTML(html, item, true);
+  html.append('<div id="magnified-container"><div id="magnified">Loading...</div></div>');
+  html.append("</div><script>var timestamp = " + item.SessionTimestamp + ";</script>");
+  html.append(scriptSrcTag('jquery.3.1.0.min.js'));
+  html.append(scriptSrcTag('session.min.js'));
+  html.append("</body></html>");
   async.waterfall([
     function(callback) {
       html.build(callback);
@@ -286,11 +293,11 @@ function updateHTMLWithResults(results, callback) {
     }));
   var html = new StringBuilder();
   html.append('<!doctype html><html lang="en">' +
-              '<head><meta charset="utf-8"><title>Adam&apos;s Heart</title></head>' +
+              '<head><meta charset="utf-8"/><title>Adam&apos;s Heart</title></head>' +
               '<body>');
   html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px"><div id="sessions">`);
   for (var i = 0; i < numResultsToWrite; i++) {
-    writeResultToHTML(html, results[i]);
+    writeResultToHTML(html, results[i], false);
   }
   html.append('</div><div id="more-sessions">Loading...</div></div>');
   html.append(`<script>var sessions = ${resultsJson};</script>`);
@@ -316,7 +323,7 @@ function scriptSrcTag(script) {
   return `<script src=/${script}></script>`;
 }
 
-function writeResultToHTML(html, result) {
+function writeResultToHTML(html, result, sessionPage) {
   html.append(`<div id="session-${result.SessionTimestamp}">`);
   html.append(`<a href="/${result.SessionTimestamp}">` +
               shortFormatTimestamp(result.SessionTimestamp) +
@@ -325,12 +332,20 @@ function writeResultToHTML(html, result) {
   if (result.NumThreshold > 10) {
     html.append(`<span>mean ${result.MeanThreshold} / min ${result.MinThreshold} / max ${result.MaxThreshold} / count ${result.NumThreshold}</span><br/>`);
   }
-  html.append(`<a href="/${result.SessionTimestamp}">`);
+  if (sessionPage) {
+    html.append('<div id="session">');
+  } else {
+    html.append(`<a href="/${result.SessionTimestamp}">`);
+  }
   html.append('<img src="' +
               result.SessionTimestamp + '.' +
               IMAGE_VERSION + '.png" width="' + IMAGE_WIDTH +
               '" height="' + IMAGE_HEIGHT + '"></img>');
-  html.append('</a>');
+  if (sessionPage) {
+    html.append('</div>');
+  } else {
+    html.append('</a>');
+  }
   html.append('</div>');
 }
 
