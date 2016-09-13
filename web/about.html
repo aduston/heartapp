@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>About Adam&apos;s Heart</title>
+  </head>
+  <body>
+    <div style="margin-left:auto;margin-right:auto;width:980px">
+      <div style="margin-bottom: 30px">
+        <a href="/">Back to adamsheart.com</a>
+      </div>
+      <h2>What is this?</h2>
+      <p>I was born with bifascicular block but, for the first 39 years of my life, never had any symptoms. In September of 2015 I started having noticeable problems with my heart, but they were inconsistent -- I would have them for weeks at a time and then they would disappear for several weeks. I started <a href="https://docs.google.com/document/d/1CikmtrY3Sbt0MAV_YXEhxrQnCOPuNWWjAjj2Gv5Lcb8">recording observations in a Google Doc</a> back in January, first just subjective impressions and then, starting on January 22, 2015, with a <a href="https://www.polar.com/us-en/products/accessories/H7_heart_rate_sensor">Polar H7 strap<a>. None of the apps reported what I needed, so during a vacation in July 2016 I <a href="https://github.com/aduston/heartapp/tree/master/AdamsHeart">built an app that runs on my iPhone</a> using <a href="https://github.com/aduston/heartapp/blob/3a76430f7eb2fc7c6cb906d62661bc17d807f18d/AdamsHeart/BLEHeartRateMonitor.swift">data from the heart rate strap</a> and worked quite well for my purposes.</p>
+      <h2>Why were existing apps insufficient?</h2>
+      <figure style="float:right">
+        <img src="/skippedbeats.png" width="213" height="262" alt="9/6/2016 7:25 pm">
+        <figcaption><a href="/1473203332#864">Skipped beat example</a></figcaption>
+      </figure>
+      <p>All of the apps I found reported the Heart Rate Measurement Value from the characteristic reported by the device. I believe the device computes this by counting the total number of P-P or R-R intervals over a sliding 6-second window and multiplying by ten. My app essentially ignores the HRMV reported by the device and <a href="https://github.com/aduston/heartapp/blob/3a76430f7eb2fc7c6cb906d62661bc17d807f18d/AdamsHeart/BLEHeartRateMonitor.swift#L169-L170">instead uses</a> the <a href="https://courses.kcumb.edu/physio/ecg%20primer/normecgcalcs.htm#The R-R interval">RR-Interval</a>, which is reported in <a href="https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.heart_rate_measurement.xml&u=org.bluetooth.characteristic.heart_rate_measurement.xml">a different byte segment of the bluetooth characteristic</a>. This was the only way I was able to pick up individual skipped beats.</p>
+      <h2>What is going on in the data?</h2>
+      <figure style="float: left">
+        <img src="/badday.png" width="303" height="220">
+        <figcaption><a href="/1470147821#10922">A bad day</a></figcaption>
+      </figure>
+      <p>There are a few different types of phenomena in the data. On an especially good day, you can see my heart rate getting up to about 140 with just occasional skipped beats. On a regular day, you'll see that it can't get above 120 or so without dropping beats. When this starts happening but I keep pushing myself physically, my heart just <a href="/1472733296#363">drops every other beat consecutively</a>. On a bad day, I can't even get my heart rate above 100 without getting skipped beats.</p>
+      <p>Lots of skipped beats that are not consecutive (i.e. interspersed with regular beats) tend to feel pretty uncomfortable -- usually feels like I'm going to faint.</p>
+      <h2 style="clear: both">Why not just rely on data doctors were able to collect?</h2>
+      <p>I got a holter monitor in October 2015 but that was during a period lasting several weeks when I wasn't experiencing the problem. By 2016 this put me in the unfortunate position of having a pretty bad long-lasting problem that had not yet been observed at all by medical professionals (it was later revealed that there was one skipped beat identified in the recordings). I also underwent an <a href="https://en.wikipedia.org/wiki/Electrophysiology_study">EP study</a> in May 2016 in which the problem was elicited -- so the doctors were able to collect some good data, charging my insurance company around $50k in the process.</p>
+      <p>I think current holter monitor programs are pretty bad. The devices are bulky, the data is opaque to patients, and the reporting mechanism given to patients is clumsy and prone to error.</p>
+      <h2>What ended up happening? </h2>
+      <p>Well, the data you see in the charts unequivocally spells out <a href="http://lifeinthefastlane.com/ecg-library/basics/mobitz-2/">type 2 second-degree AV block, aka "Mobitz II"</a>. This makes sense given the pre-existing bifascicular block; the measurable phenomenon is likely produced by intermittent failure of the remaining fascicle. I ended up getting a pacemaker on 9/12/2016.</p>
+      <h2>I would love to use your app!</h2>
+      <p>Well, <a href="https://github.com/aduston/heartapp">it's all open-source</a>, so feel free to do whatever you want with it. If you want me to put it on the app store or something, I'm happy to do that, just email me.</p>
+    </div>
+  </body>
+</html>

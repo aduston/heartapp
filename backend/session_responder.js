@@ -296,7 +296,9 @@ function updateHTMLWithResults(results, callback) {
   html.append('<!doctype html><html lang="en">' +
               '<head><meta charset="utf-8"/><title>Adam&apos;s Heart</title></head>' +
               '<body>');
-  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px"><div id="sessions">`);
+  html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
+  html.append('<div style="margin-bottom: 30px"><a href="/about">About adamsheart.com</a></div>');
+  html.append('<div id="sessions">');
   for (var i = 0; i < numResultsToWrite; i++) {
     writeResultToHTML(html, results[i], false);
   }
