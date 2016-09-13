@@ -13,6 +13,10 @@ var data = null;
 $.getJSON('/' + timestamp + '.json', function(resp) {
   data = resp;
   $('#magnified').empty();
+  $('#magnified-container').parent().append(
+    $('<div>').addClass('link').append(
+      $('<span>').text("Link "),
+      $('<input>').attr('type', 'text').val(document.location)));
   load();
 });
 
@@ -43,6 +47,8 @@ function load() {
   $magnifier.on('mousedown', function(e) {
     imageLeft = $('#session img').offset().left;
     draggingPos = $magnifier.offset().left - e.pageX;
+    e.preventDefault()
+    e.stopPropagation()
   });
   $(document.body).on('mousemove', function(e) {
     if (draggingPos == null) {
@@ -57,9 +63,13 @@ function load() {
       left: newLeft
     });
     updateMag(Math.floor(((newLeft - MARGIN - imageLeft) / IMG_WIDTH) * data.length));
+    e.preventDefault()
+    e.stopPropagation()
   });
   $(document.body).on('mouseup', function(e) {
     draggingPos = null;
+    e.preventDefault()
+    e.stopPropagation()
   });
   updateMag(startObs);
 }
@@ -156,8 +166,13 @@ function addMag(startObs) {
   magPanels.push(magPanel);
 }
 
+function setLocation(startObs) {
+  var loc = 'https://adamsheart.com' + document.location.pathname + '#' + startObs;
+  $('div.link input').val(loc);
+}
+
 function updateMag(startObs) {
-  document.location.hash = startObs + '';
+  setLocation(startObs);
   if (magPanels.length == 0) {
     addMag(startObs - (startObs % NUM_OBS));
   }
@@ -166,22 +181,22 @@ function updateMag(startObs) {
   }
   var indexWithIntersection = findPanelWithIntersection(startObs);
   if (indexWithIntersection == -1) {
+    indexWithIntersection = 0;
     magPanels[0].setStartObs(startObs - (startObs % NUM_OBS));
     magPanels[0].makeFirst();
     magPanels[0].setLeftPos(startObs);
-  } else {
-    var panel0 = magPanels[indexWithIntersection];
-    var panel1 = magPanels[(indexWithIntersection + 1) % 2];
-    if (panel0.startObs < startObs && panel1.startObs < panel0.startObs) {
-      panel1.setStartObs(panel0.startObs + NUM_OBS);
-      panel0.makeFirst();
-    } else if (panel0.startObs > startObs && panel1.startObs > panel0.startObs) {
-      panel1.setStartObs(panel0.startObs - NUM_OBS);
-      panel1.makeFirst();
-    }
-    panel0.setLeftPos(startObs);
-    if (panel1) {
-      panel1.setLeftPos(startObs);
-    }
+  }
+  var panel0 = magPanels[indexWithIntersection];
+  var panel1 = magPanels[(indexWithIntersection + 1) % 2];
+  if (panel0.startObs < startObs && panel1.startObs < panel0.startObs) {
+    panel1.setStartObs(panel0.startObs + NUM_OBS);
+    panel0.makeFirst();
+  } else if (panel0.startObs > startObs && panel1.startObs > panel0.startObs) {
+    panel1.setStartObs(panel0.startObs - NUM_OBS);
+    panel1.makeFirst();
+  }
+  panel0.setLeftPos(startObs);
+  if (panel1) {
+    panel1.setLeftPos(startObs);
   }
 }

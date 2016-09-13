@@ -45,3 +45,12 @@
     width: 80px;
     text-align: center;
 }
+div.link {
+    padding-left: 30px;
+    padding-top: 10px;
+}
+div.link input {
+    width: 600px;
+    font-size: 16px;
+    padding: 4px;
+}
