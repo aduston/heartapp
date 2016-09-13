@@ -63,6 +63,19 @@ def invalidate(path):
             }
         })
 
+def deploy_about():
+    web_dir = os.path.dirname(os.path.realpath(__file__))
+    files = [['about.html', 'about', 'text/html'],
+             ['skippedbeats.png', 'image/png'],
+             ['badday.png', 'image/png']]
+    for f in files:
+        path = os.path.join(web_dir, f[0])
+        out_name = f[-2]
+        content_type = f[-1]
+        with open(path, 'r') as f_in:
+            write_asset(f_in, out_name, content_type, False)
+        invalidate("/{0}".format(out_name))
+
 def write_asset(f_in, name, content_type, cache_forever):
     gzipped = StringIO.StringIO()
     with gzip.GzipFile(fileobj=gzipped, mode='w') as f_out:
@@ -82,6 +95,7 @@ def write_asset(f_in, name, content_type, cache_forever):
     s3client.put_object(**kwargs)
 
 def deploy():
+    deploy_about()
     deploy_external()
     deploy_js('index')
     deploy_js('session')
