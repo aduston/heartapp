@@ -11,7 +11,7 @@ var StringBuilder = require('stringbuilder');
 var moment = require('moment-timezone');
 
 let IMAGE_VERSION = 5;
-let HTML_VERSION = 4;
+let HTML_VERSION = 5;
 let JSON_VERSION = 1;
 
 let IMAGE_WIDTH = 980;
@@ -245,6 +245,7 @@ function updateSessionHTML(item, callback) {
   html.append('</head>');
   html.append('<body>');
   html.append(`<div style="margin-left:auto;margin-right:auto;width:${IMAGE_WIDTH}px">`);
+  html.append('<div id="back"><a href="/">Back to adamsheart.com</a></div>');
   writeResultToHTML(html, item, true);
   html.append('<div id="magnified-container"><div id="magnified">Loading...</div></div>');
   html.append("</div><script>var timestamp = " + item.SessionTimestamp + ";</script>");
